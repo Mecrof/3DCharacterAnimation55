@@ -34,6 +34,12 @@ namespace scene
 
         Node& getRootNode();
 
+    signals:
+        void closing();
+
+    public slots:
+        virtual void closeEvent(QCloseEvent * e);
+
     private:
         virtual void initializeGL();
         virtual void resizeGL(int w, int h);

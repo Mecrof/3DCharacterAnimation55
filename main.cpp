@@ -13,7 +13,5 @@ int main(int argc, char *argv[])
     std::cout << "OpenGL Vendor: " << (char*) glGetString(GL_VENDOR) << "\n";
     std::cout << "OpenGL Renderer: " << (char*) glGetString(GL_RENDERER) << std::endl;
     std::cout << "OpenGL Version: " << (char*) glGetString(GL_VERSION) << std::endl;
-
-    //app.setQuitOnLastWindowClosed(true);
     return app.exec();
 }

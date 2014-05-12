@@ -23,6 +23,7 @@ namespace engine
         else
         {
             m_renderer = renderer;
+            connect(m_renderer, SIGNAL(closing()), this, SLOT(exitEvent()));
         }
         m_time = QTime();
     }
@@ -30,7 +31,7 @@ namespace engine
     Engine::~Engine()
     {
         std::cout <<"Timer stopping" <<std::endl;
-        m_timer->stop();
+        //m_timer->stop();
         delete m_timer;
         //delete m_renderer;
         std::cout <<"Timer stopped"<<std::endl;
@@ -51,5 +52,13 @@ namespace engine
         //std::cout <<"Time per frame : "<<tpf/1000.0f<<std::endl;
         m_renderer->update(tpf/1000.0f);
         m_renderer->updateGL();
+    }
+
+    void Engine::exitEvent()
+    {
+        this->disconnect(m_renderer, SIGNAL(closing()), this, SLOT(clockEvent()));
+        this->disconnect(m_timer, SIGNAL(timeout()), this, SLOT(clockEvent()));
+        m_timer->stop();
+        std::cout << "ExitEvent" << std::endl;
     }
 }

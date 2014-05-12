@@ -74,4 +74,10 @@ namespace scene
 
         //TODO: Render the subNodes
     }
+
+    void GLRenderer::closeEvent(QCloseEvent * e)
+    {
+        std::cout << "closeEvent" << std::endl;
+        emit closing();
+    }
 }

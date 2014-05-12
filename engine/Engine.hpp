@@ -20,6 +20,7 @@ namespace engine
 
     public slots:
         virtual void clockEvent();
+        virtual void exitEvent();
 
     private:
         QTimer * m_timer;
