@@ -5,11 +5,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 // GLM includes
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+
 // QT includes
 #include <QGLWidget>
 #include <QKeyEvent>

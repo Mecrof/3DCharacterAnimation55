@@ -3,16 +3,21 @@
 
 #include "scene/GLRenderer.hpp"
 #include "impl/Triangle.hpp"
+#include <math.h>
 
 class SceneWindow : public scene::GLRenderer
 {
 public:
     explicit SceneWindow(QWidget * parent = 0);
 
-    void update(float tpf);
     void initialize();
+    void update(float tpf);
+
 
     Triangle * triangle;
+     Triangle * triangle2;
+    scene::Node * subNode;
+
     float factor;
     float time;
 

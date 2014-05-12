@@ -28,7 +28,7 @@ namespace scene
 
     void SceneObject::render(glm::mat4 modelView, glm::mat4 projection)
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+
         glUseProgram(m_shader->getProgramID());
 
             GLint idVertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");

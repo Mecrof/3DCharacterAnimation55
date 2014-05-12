@@ -12,6 +12,7 @@ namespace scene
         this->resize(width, height);
 
         m_rootNode = new Node();
+        m_rootNode->setName("Root Node");
     }
 
     GLRenderer::~GLRenderer()
@@ -60,19 +61,8 @@ namespace scene
 
     void GLRenderer::paintGL()
     {
-        QLinkedList<Node *> * children;
-        m_modelView = glm::mat4(1.0);
-        m_modelView = glm::scale(m_modelView, m_rootNode->getScale());
-        m_modelView *= glm::toMat4(m_rootNode->getRotation());
-        m_modelView = glm::translate(m_modelView, m_rootNode->getPosition());
-        if (m_rootNode->hasObject())
-        {            
-            m_rootNode->getObject().render(m_modelView, m_projection);
-        }
-        /*m_roo
-        if ()*/
-
-        //TODO: Render the subNodes
+        glClear(GL_COLOR_BUFFER_BIT);
+        m_rootNode->render(m_modelView, m_projection);
     }
 
     void GLRenderer::closeEvent(QCloseEvent * e)
