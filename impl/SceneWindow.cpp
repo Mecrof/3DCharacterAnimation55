@@ -4,7 +4,6 @@ SceneWindow::SceneWindow(QWidget *parent)
     : GLRenderer(parent, 800, 600, "Opengl Engine v0.1")
 {
     factor = 1.0f;
-    time = 0.0f;
 }
 
 void SceneWindow::initialize()
@@ -19,8 +18,9 @@ void SceneWindow::initialize()
     this->getRootNode().attachNode((*subNode));
 
     subNode->setObject(triangle2);
-    subNode->translate(glm::vec3(-1.0f,0.0f,0.0f));
-    subNode->scale(glm::vec3(-0.5f,-0.5f,0.0f));
+    subNode->setPosition(-1.0f,0.0f,0.0f);
+    subNode->setScale(0.5f,0.5f,1.0f);
+
 }
 
 void SceneWindow::update(float tpf)
@@ -28,16 +28,13 @@ void SceneWindow::update(float tpf)
     scene::Node & rootnode = getRootNode();
     rootnode.rotate(M_PI_2*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
 
-    if (time > 2.0f)
+    if(subNode->getPosition().x > 1.5f || subNode->getPosition().x < -1.5f)
     {
-        time = 0.0f;
-        factor *= -1.0f;
+        factor *= -1;
     }
-    else
-    {
-        time += tpf;
-    }
-    rootnode.scale(glm::vec3(0.5f*tpf*factor, 0.5f*tpf*factor, 0.0f));
+    subNode->translate(1.5f*tpf*factor,0.0f,0.0f);
+    subNode->rotate(M_PI*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
+
     triangle->update(tpf);
 }
 

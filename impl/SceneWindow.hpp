@@ -19,7 +19,6 @@ public:
     scene::Node * subNode;
 
     float factor;
-    float time;
 
 
 };

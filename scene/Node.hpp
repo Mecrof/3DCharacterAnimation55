@@ -24,8 +24,11 @@ namespace scene {
         void render(glm::mat4 modelView, glm::mat4 projection);
 
         glm::vec3 *translate(glm::vec3 vector);
+        glm::vec3 *translate(float x, float y, float z);
         glm::quat *rotate(float angle, glm::vec3 axis);
+        glm::quat *rotate(glm::quat rotation);
         glm::vec3 *scale(glm::vec3 factors);
+        glm::vec3 *scale(float x, float y, float z);
 
         SceneObject& getObject();
         SceneObject * setObject(SceneObject * object);
@@ -33,8 +36,15 @@ namespace scene {
         void setParent(Node & p);
 
         glm::vec3 &getPosition();
+        void setPosition(glm::vec3 position);
+        void setPosition(float x, float y, float z);
         glm::quat &getRotation();
+        void setRotation(glm::quat rotation);
+        void setRotation(float angle, glm::vec3 axis);
         glm::vec3 &getScale();
+        void setScale(glm::vec3 scale);
+        void setScale(float x, float y, float z);
+
         bool hasObject();
         QLinkedList<Node*> * getChildren();
 

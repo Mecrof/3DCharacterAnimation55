@@ -33,9 +33,10 @@ namespace scene
     {
         QLinkedList<Node*>::iterator it;
         Node * child;
-        modelView = glm::scale(modelView, m_scale);
-        modelView *= glm::toMat4(m_rotation);
+
         modelView = glm::translate(modelView, m_position);
+        modelView *= glm::toMat4(m_rotation);
+        modelView = glm::scale(modelView, m_scale);
         if (this->hasObject())
         {
             m_object->render(modelView, projection);
@@ -56,16 +57,31 @@ namespace scene
         return &m_position;
     }
 
+    glm::vec3 *Node::translate(float x, float y, float z)
+    {
+        return translate(glm::vec3(x,y,z));
+    }
+
     glm::quat *Node::rotate(float angle, glm::vec3 axis)
     {
-        m_rotation *= glm::angleAxis(angle, axis);
+        return rotate(glm::angleAxis(angle, axis));
+    }
+
+    glm::quat *Node::rotate(glm::quat rotation)
+    {
+        m_rotation *= rotation;
         return &m_rotation;
     }
 
     glm::vec3 *Node::scale(glm::vec3 factors)
     {
-        m_scale += factors;
+        m_scale *= factors;
         return &m_scale;
+    }
+
+    glm::vec3 *Node::scale(float x, float y, float z)
+    {
+        return scale(glm::vec3(x,y,z));
     }
 
     SceneObject &Node::getObject()
@@ -99,14 +115,44 @@ namespace scene
         return m_position;
     }
 
+    void Node::setPosition(glm::vec3 position)
+    {
+        m_position = position;
+    }
+
+    void Node::setPosition(float x, float y, float z)
+    {
+        m_position.x = x; m_position.y = y; m_position.z = z;
+    }
+
     glm::quat &Node::getRotation()
     {
         return m_rotation;
     }
 
+    void Node::setRotation(glm::quat rotation)
+    {
+        m_rotation = rotation;
+    }
+
+    void Node::setRotation(float angle, glm::vec3 axis)
+    {
+        m_rotation = glm::angleAxis(angle, axis);
+    }
+
     glm::vec3 &Node::getScale()
     {
         return m_scale;
+    }
+
+    void Node::setScale(glm::vec3 scale)
+    {
+        m_scale = scale;
+    }
+
+    void Node::setScale(float x, float y, float z)
+    {
+        m_scale.x = x; m_scale.y = y; m_scale.z = z;
     }
 
     bool Node::hasObject()
