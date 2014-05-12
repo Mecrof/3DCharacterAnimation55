@@ -59,7 +59,6 @@ namespace scene
 
     glm::quat *Node::rotate(float angle, glm::vec3 axis)
     {
-        //if (m_rotation.w == 0 && m_rotation.)
         m_rotation *= glm::angleAxis(angle, axis);
         return &m_rotation;
     }
@@ -100,6 +99,11 @@ namespace scene
     bool Node::hasObject()
     {
         return (m_object != NULL && m_object != 0);
+    }
+
+    QLinkedList<Node *> *Node::getChildren()
+    {
+        return m_children;
     }
 
 }

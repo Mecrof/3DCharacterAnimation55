@@ -1,7 +1,7 @@
 #include "SceneWindow.hpp"
 
-SceneWindow::SceneWindow(QWidget *parent, QGLFormat *format)
-    : GLRenderer(parent, 800, 600, format, "Opengl Engine v0.1")
+SceneWindow::SceneWindow(QWidget *parent)
+    : GLRenderer(parent, 800, 600, "Opengl Engine v0.1")
 {
     this->getRootNode().translate(glm::vec3(0.0f,0.0f,-1.0f));
     factor = 1.0f;

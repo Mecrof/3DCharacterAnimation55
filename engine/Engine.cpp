@@ -30,10 +30,8 @@ namespace engine
     Engine::~Engine()
     {
         std::cout <<"Timer stopping" <<std::endl;
-        /*m_timer->stop();
-        m_timer->thread()->exit(0);
-        */
-        //delete m_timer;
+        m_timer->stop();
+        delete m_timer;
         //delete m_renderer;
         std::cout <<"Timer stopped"<<std::endl;
     }
@@ -49,11 +47,9 @@ namespace engine
     {
         int tpf = m_time.elapsed();
         m_time.restart();
-        std::cout <<"Time per frame : "<<tpf/1000.0f<<std::endl;
+        std::cout <<"FPS : "<<1000.0f/tpf<<std::endl;
+        //std::cout <<"Time per frame : "<<tpf/1000.0f<<std::endl;
         m_renderer->update(tpf/1000.0f);
         m_renderer->updateGL();
-
-        //m_timer->
-        //m_renderer->update();
     }
 }

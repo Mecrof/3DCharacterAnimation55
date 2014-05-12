@@ -33,6 +33,7 @@ namespace scene {
         glm::quat &getRotation();
         glm::vec3 &getScale();
         bool hasObject();
+        QLinkedList<Node*> * getChildren();
 
     private:
         Node * m_parent;

@@ -7,7 +7,7 @@
 class SceneWindow : public scene::GLRenderer
 {
 public:
-    explicit SceneWindow(QWidget * parent = 0, QGLFormat * format = 0);
+    explicit SceneWindow(QWidget * parent = 0);
 
     void update(float tpf);
     void initialize();

@@ -12,8 +12,6 @@
 #include <glm/gtx/quaternion.hpp>
 // QT includes
 #include <QGLWidget>
-#include <QGLFormat>
-#include <QGLContext>
 #include <QKeyEvent>
 // Project includes
 #include "scene/Node.hpp"
@@ -27,7 +25,6 @@ namespace scene
         explicit GLRenderer(QWidget * parent = 0,
                             int width = 800,
                             int height = 600,
-                            QGLFormat * format = 0,
                             char * name = 0);
         ~GLRenderer();
 
@@ -41,9 +38,6 @@ namespace scene
         virtual void initializeGL();
         virtual void resizeGL(int w, int h);
         virtual void paintGL();
-
-        QGLFormat * m_GLFormat;
-        QGLContext * m_GLContext;
 
         glm::mat4 m_projection;
         glm::mat4 m_modelView;
