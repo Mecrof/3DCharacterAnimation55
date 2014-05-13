@@ -14,7 +14,8 @@ SOURCES += \
     scene/SceneObject.cpp \
     scene/Shader.cpp \
     impl/SceneWindow.cpp \
-    impl/Triangle.cpp
+    impl/Triangle.cpp \
+    scene/Spatial.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -23,7 +24,8 @@ HEADERS += \
     scene/SceneObject.hpp \
     scene/Shader.hpp \
     impl/SceneWindow.hpp \
-    impl/Triangle.hpp
+    impl/Triangle.hpp \
+    scene/Spatial.hpp
 
 OTHER_FILES += \
     Shaders/texture.vert \

@@ -4,15 +4,16 @@
 
 namespace scene
 {
-    Node::Node()
+    Node::Node():Spatial()
     {
         m_parent = NULL;
         m_children = new QLinkedList<Node*>;
         m_object = NULL;
+        /*
         m_position = glm::vec3(0.0f);
         m_rotation = glm::angleAxis(0.0f, glm::vec3(0.0f));
         m_scale = glm::vec3(1.0f);
-
+    */
     }
 
     Node::~Node()
@@ -50,7 +51,7 @@ namespace scene
             }
         }
     }
-
+/*
     glm::vec3 *Node::translate(glm::vec3 vector)
     {
         m_position += vector;
@@ -83,7 +84,7 @@ namespace scene
     {
         return scale(glm::vec3(x,y,z));
     }
-
+*/
     SceneObject &Node::getObject()
     {
         return (*m_object);
@@ -109,7 +110,7 @@ namespace scene
     {
         m_parent = &p;
     }
-
+/*
     glm::vec3 &Node::getPosition()
     {
         return m_position;
@@ -154,7 +155,7 @@ namespace scene
     {
         m_scale.x = x; m_scale.y = y; m_scale.z = z;
     }
-
+*/
     bool Node::hasObject()
     {
         return (m_object != NULL && m_object != 0);
