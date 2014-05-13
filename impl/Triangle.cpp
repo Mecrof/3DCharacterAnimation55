@@ -3,7 +3,7 @@
 #include <iostream>
 Triangle::Triangle()
 {
-    m_vertices = new float[9]{-1.0, -1.0, -1.0,   0.0, 1.0, -1.0,   1.0, -1.0, -1.0};
+    m_vertices = new float[9]{-1.0, -1.0, 0.0,   0.0, 1.0, 0.0,   1.0, -1.0, 0.0};
     m_colors = new float[9]{1.0, 0.0, 0.0,    0.0, 1.0, 0.0,    0.0, 0.0, 1.0};
     m_shader = new scene::Shader("./Shaders/couleur3D.vert", "./Shaders/couleur3D.frag");
     m_shader->bind();

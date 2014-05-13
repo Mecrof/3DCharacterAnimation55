@@ -11,7 +11,7 @@ void SceneWindow::initialize()
     triangle = new Triangle();
     triangle2 = new Triangle();
     this->getRootNode().setObject(triangle);
-    this->getRootNode().translate(glm::vec3(0.0f,0.0f,-1.0f));
+    this->getRootNode().setPosition(glm::vec3(0.0f,0.0f,-5.0f));
     subNode = new scene::Node();
     subNode->setParent(this->getRootNode());
     subNode->setName("subNode");
@@ -32,8 +32,8 @@ void SceneWindow::update(float tpf)
     {
         factor *= -1;
     }
-    subNode->translate(1.5f*tpf*factor,0.0f,0.0f);
-    subNode->rotate(M_PI*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
+    subNode->translate(1.0f*tpf*factor,0.0f,0.0f);
+    subNode->rotate(M_PI_2*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
 
     triangle->update(tpf);
 }
