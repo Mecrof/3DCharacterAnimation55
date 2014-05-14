@@ -30,7 +30,27 @@ namespace scene
                 close();
                 break;
         }
+        if(Qt::Key_Up || Qt::Key_Down || Qt::Key_Left || Qt::Key_Right )
+                {
+                    cam->move(e);
+                }
     }
+
+    void GLRenderer::mouseMoveEvent(QMouseEvent *event)
+        {
+            if(event->type() == QEvent::MouseMove)
+            {
+                QMouseEvent *Mouse = static_cast<QMouseEvent*>(event);
+                int xRel;
+                int yRel;
+                xRel = Mouse->x() - Mousex;
+                yRel = Mouse->y() - Mousey;
+                cam->orientation(xRel,yRel,0.5);
+                Mousex = Mouse->x();
+                Mousey = Mouse->y();
+                std::cout << "Coordonnees : " << Mousex << " " << Mousey << std::endl;
+            }
+        }
 
     Node &GLRenderer::getRootNode()
     {
@@ -48,7 +68,7 @@ namespace scene
             Q_ASSERT(init_GLEW != GLEW_OK);
         }
         //#endif
-
+        cam = new Camera(glm::vec3(3,3,3), glm::vec3(1,0,0), glm::vec3(0,1,0));
         m_modelView = glm::mat4(1.0);
         this->initialize();
     }
@@ -61,6 +81,7 @@ namespace scene
 
     void GLRenderer::paintGL()
     {
+        cam->lookat(m_modelView);
         glClear(GL_COLOR_BUFFER_BIT);
         m_rootNode->render(m_modelView, m_projection);
     }

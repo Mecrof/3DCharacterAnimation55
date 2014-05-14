@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 // Project includes
 #include "scene/Node.hpp"
+#include "scene/camera.hpp"
 
 namespace scene
 {
@@ -28,6 +29,7 @@ namespace scene
         virtual void initialize() = 0;
         virtual void keyPressEvent(QKeyEvent * e);
 
+        void mouseMoveEvent(QMouseEvent * event);
         Node& getRootNode();
 
     signals:
@@ -41,10 +43,14 @@ namespace scene
         virtual void resizeGL(int w, int h);
         virtual void paintGL();
 
+        int Mousex = 0;
+        int Mousey = 0;
+
         glm::mat4 m_projection;
         glm::mat4 m_modelView;
 
         Node * m_rootNode;
+        Camera * cam;
 
     };
 }
