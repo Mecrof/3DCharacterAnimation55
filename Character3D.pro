@@ -15,7 +15,8 @@ SOURCES += \
     scene/Shader.cpp \
     impl/SceneWindow.cpp \
     impl/Triangle.cpp \
-    scene/Spatial.cpp
+    scene/Spatial.cpp \
+    scene/camera.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -25,7 +26,8 @@ HEADERS += \
     scene/Shader.hpp \
     impl/SceneWindow.hpp \
     impl/Triangle.hpp \
-    scene/Spatial.hpp
+    scene/Spatial.hpp \
+    scene/camera.hpp
 
 OTHER_FILES += \
     Shaders/texture.vert \
