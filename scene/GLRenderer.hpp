@@ -11,7 +11,7 @@
 #include <QKeyEvent>
 // Project includes
 #include "scene/Node.hpp"
-#include "scene/camera.hpp"
+#include "scene/Camera.hpp"
 
 namespace scene
 {

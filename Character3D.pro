@@ -16,7 +16,10 @@ SOURCES += \
     impl/SceneWindow.cpp \
     impl/Triangle.cpp \
     scene/Spatial.cpp \
-    scene/camera.cpp
+    model/Loader.cpp \
+    scene/Mesh.cpp \
+    scene/Light.cpp \
+    scene/Camera.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -27,7 +30,10 @@ HEADERS += \
     impl/SceneWindow.hpp \
     impl/Triangle.hpp \
     scene/Spatial.hpp \
-    scene/camera.hpp
+    model/Loader.hpp \
+    scene/Mesh.hpp \
+    scene/Light.hpp \
+    scene/Camera.hpp
 
 OTHER_FILES += \
     Shaders/texture.vert \
@@ -37,4 +43,7 @@ OTHER_FILES += \
     Shaders/couleur2D.vert \
     Shaders/couleur2D.frag \
     Shaders/basique2D.vert \
-    Shaders/basique2D.frag
+    Shaders/basique2D.frag \
+    Shaders/light.vert \
+    Shaders/light.frag \
+    Suzanne.obj

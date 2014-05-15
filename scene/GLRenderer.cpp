@@ -68,7 +68,7 @@ namespace scene
             Q_ASSERT(init_GLEW != GLEW_OK);
         }
         //#endif
-        cam = new Camera(glm::vec3(3,3,3), glm::vec3(1,0,0), glm::vec3(0,1,0));
+        cam = new Camera(glm::vec3(3.0,2.149,2.617), glm::vec3(0,0,0), glm::vec3(0,1,0));
         m_modelView = glm::mat4(1.0);
         this->initialize();
     }
@@ -76,7 +76,7 @@ namespace scene
     void GLRenderer::resizeGL(int w, int h)
     {
         glViewport(0,0,w,h);
-        m_projection = glm::perspective(45.0, w/static_cast<double>(h), 1.0, 100.0);
+        m_projection = glm::perspective(70.0, w/static_cast<double>(h), 1.0, 100.0);
     }
 
     void GLRenderer::paintGL()

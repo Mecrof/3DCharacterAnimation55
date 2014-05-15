@@ -2,6 +2,7 @@
 #define SCENEWINDOW_HPP
 
 #include "scene/GLRenderer.hpp"
+#include "scene/Mesh.hpp"
 #include "impl/Triangle.hpp"
 #include <math.h>
 
@@ -14,6 +15,7 @@ public:
     void update(float tpf);
 
 
+    scene::Mesh * myMesh;
     Triangle * triangle;
      Triangle * triangle2;
     scene::Node * subNode;

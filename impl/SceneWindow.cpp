@@ -8,6 +8,13 @@ SceneWindow::SceneWindow(QWidget *parent)
 
 void SceneWindow::initialize()
 {
+    //*
+    myMesh = new scene::Mesh("./Suzanne.obj");
+    myMesh->init();
+    this->getRootNode().setObject(myMesh);
+    //this->getRootNode().setPosition(glm::vec3(0.0f,0.0f,-4.0f));
+    //*/
+    /*
     triangle = new Triangle();
     triangle2 = new Triangle();
     this->getRootNode().setObject(triangle);
@@ -20,14 +27,14 @@ void SceneWindow::initialize()
     subNode->setObject(triangle2);
     subNode->setPosition(-1.0f,0.0f,0.0f);
     subNode->setScale(0.5f,0.5f,1.0f);
-
+    //*/
 }
 
 void SceneWindow::update(float tpf)
 {
     scene::Node & rootnode = getRootNode();
-    rootnode.rotate(M_PI_2*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
-
+    rootnode.rotate((M_PI/10.0f)*tpf, glm::vec3(0.0f, 1.0f, 0.0f));
+    /*
     if(subNode->getPosition().x > 1.5f || subNode->getPosition().x < -1.5f)
     {
         factor *= -1;
@@ -36,6 +43,7 @@ void SceneWindow::update(float tpf)
     subNode->rotate(M_PI_2*tpf, glm::vec3(0.0f, 0.0f, 1.0f));
 
     triangle->update(tpf);
+    */
 }
 
 

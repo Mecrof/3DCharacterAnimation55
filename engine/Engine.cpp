@@ -48,7 +48,7 @@ namespace engine
     {
         int tpf = m_time.elapsed();
         m_time.restart();
-        std::cout <<"FPS : "<<1000.0f/tpf<<std::endl;
+        //std::cout <<"FPS : "<<1000.0f/tpf<<std::endl;
         //std::cout <<"Time per frame : "<<tpf/1000.0f<<std::endl;
         m_renderer->update(tpf/1000.0f);
         m_renderer->updateGL();
