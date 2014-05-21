@@ -14,6 +14,7 @@ public:
     void initialize();
     void update(float tpf);
 
+    void keyPressEvent(QKeyEvent * e);
 
     scene::Mesh * myMesh;
     Triangle * triangle;

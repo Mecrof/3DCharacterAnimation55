@@ -15,6 +15,8 @@ namespace scene
         void update(float);
         void render(glm::mat4 modelView, glm::mat4 projection);
 
+        Shader &getShader();
+
     private:
         const char* m_sourceFileName;
         bool initialized;

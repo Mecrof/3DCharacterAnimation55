@@ -9,16 +9,37 @@ in vec3 in_Vertex;
 in vec3 in_Normal;
 
 // Varying
+varying vec3 v_posVertex;
+varying vec3 v_ecNormal;
+
+void main() {
+    v_posVertex = vec3(modelview * vec4(in_Vertex,1.0));
+    v_ecNormal = normalize(vec3(modelview * vec4(in_Normal, 0.0)));
+
+    gl_Position =  projection * modelview * vec4( in_Vertex, 1.0f );
+}
+
+/*
+// Matrices
+uniform mat4 modelview;
+uniform mat4 projection;
+
+// Attributes
+in vec3 in_Vertex;
+in vec3 in_Normal;
+
+// Varying
 varying vec3 v_ecNormal;
 
 void main() {
     // Calculate and normalize eye space normal
     vec3 ecNormal = vec3(modelview * vec4(in_Normal, 0.0));
-    ecNormal = ecNormal / length(ecNormal);
-    v_ecNormal = ecNormal;
+    v_ecNormal = ecNormal / length(ecNormal);
+    vec4 posVertex = modelview * vec4( in_Vertex, 1.0f );
 
     gl_Position =  projection * modelview * vec4( in_Vertex, 1.0f );
 }
+*/
 /*
 uniform mat4 MVP;
 in vec3 position;

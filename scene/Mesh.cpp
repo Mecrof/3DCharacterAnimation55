@@ -91,6 +91,11 @@ namespace scene
             glDisableVertexAttribArray(idVertex);
             glDisableVertexAttribArray(idNormal);
 
-        glUseProgram(0);
+            glUseProgram(0);
+    }
+
+    Shader &Mesh::getShader()
+    {
+        return (*this->m_shader);
     }
 }

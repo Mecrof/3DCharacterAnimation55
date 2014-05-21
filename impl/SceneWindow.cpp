@@ -6,6 +6,19 @@ SceneWindow::SceneWindow(QWidget *parent)
     factor = 1.0f;
 }
 
+void SceneWindow::keyPressEvent(QKeyEvent *e)
+{
+    GLRenderer::keyPressEvent(e);
+    switch(e->key())
+    {
+        case Qt::Key_B:
+            std::cout << "Rebinding Shader : ... ";
+            myMesh->getShader().bind();
+            std::cout << "Done" << std::endl;
+            break;
+    }
+}
+
 void SceneWindow::initialize()
 {
     //*
