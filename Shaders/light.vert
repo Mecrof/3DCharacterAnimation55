@@ -1,12 +1,16 @@
-#version 130
+#version 150
+// Attributes
+in vec3 in_Vertex;
+in vec2 in_TexCoord;
+in vec3 in_Normal;
+in ivec4 in_BoneIDs;
+in vec4 in_BoneWeight;
 
 // Matrices
 uniform mat4 modelview;
 uniform mat4 projection;
-
-// Attributes
-in vec3 in_Vertex;
-in vec3 in_Normal;
+//in vec3 in_Vertex;
+//in vec3 in_Normal;
 
 // Varying
 varying vec3 v_posVertex;

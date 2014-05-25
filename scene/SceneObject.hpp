@@ -19,7 +19,7 @@ namespace scene
         ~SceneObject();
 
         virtual void update(float tpf) = 0;
-        virtual void render(glm::mat4 modelView, glm::mat4 projection);
+        virtual void render(const glm::mat4 & modelView, const glm::mat4 & projection);
     //private:
         //void render(glm::mat4 modelView, glm::mat4 projection);
 

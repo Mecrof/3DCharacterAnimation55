@@ -1,9 +1,9 @@
 CONFIG += console release
 QT += opengl
 
-INCLUDEPATH = "../glew-mingw/include" "../glm/"
+INCLUDEPATH = "../glew-mingw/include" "../glm/" "..\assimp\include"
 win32 {
-    LIBS += -L"..\glew-mingw\lib" -lglew32
+    LIBS += -L"..\glew-mingw\lib" -lglew32 -L"..\assimp\lib" -llibassimp
 }
 
 SOURCES += \
@@ -19,7 +19,8 @@ SOURCES += \
     model/Loader.cpp \
     scene/Mesh.cpp \
     scene/Light.cpp \
-    scene/Camera.cpp
+    scene/Camera.cpp \
+    scene/AnimMesh.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -33,7 +34,8 @@ HEADERS += \
     model/Loader.hpp \
     scene/Mesh.hpp \
     scene/Light.hpp \
-    scene/Camera.hpp
+    scene/Camera.hpp \
+    scene/AnimMesh.h
 
 OTHER_FILES += \
     Shaders/texture.vert \
@@ -46,4 +48,8 @@ OTHER_FILES += \
     Shaders/basique2D.frag \
     Shaders/light.vert \
     Shaders/light.frag \
-    Suzanne.obj
+    Suzanne.obj \
+    Assimp32d.dll \
+    feet_hands.dae \
+    Juliet_Striped_Bikini/Juliet_Striped_Bikini.dae \
+    AnimatedPill.dae

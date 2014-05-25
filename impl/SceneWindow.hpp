@@ -4,6 +4,7 @@
 #include "scene/GLRenderer.hpp"
 #include "scene/Mesh.hpp"
 #include "impl/Triangle.hpp"
+#include "scene/AnimMesh.h"
 #include <math.h>
 
 class SceneWindow : public scene::GLRenderer
@@ -16,7 +17,8 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
-    scene::Mesh * myMesh;
+
+    AnimMesh * myMesh;
     Triangle * triangle;
      Triangle * triangle2;
     scene::Node * subNode;

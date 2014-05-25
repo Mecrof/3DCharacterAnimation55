@@ -13,7 +13,7 @@ void SceneWindow::keyPressEvent(QKeyEvent *e)
     {
         case Qt::Key_B:
             std::cout << "Rebinding Shader : ... ";
-            myMesh->getShader().bind();
+            //myMesh->getShader().bind();
             std::cout << "Done" << std::endl;
             break;
     }
@@ -22,9 +22,16 @@ void SceneWindow::keyPressEvent(QKeyEvent *e)
 void SceneWindow::initialize()
 {
     //*
-    myMesh = new scene::Mesh("./Suzanne.obj");
+    /*myMesh = new scene::Mesh("./Suzanne.obj");
     myMesh->init();
+    */
+    myMesh = new AnimMesh;
+    myMesh->loadMesh("./AnimatedPill.dae");
+//        myMesh->loadMesh("./Juliet_Striped_Bikini/Juliet_Striped_Bikini.dae");
     this->getRootNode().setObject(myMesh);
+    this->getRootNode().scale(0.5f,0.5f,0.5f);
+    //this->getRootNode().rotate(M_PI_2, glm::vec3(1.0f,0.0f,0.0f));
+    //    this->getRootNode().scale(0.025f,0.025f,0.025f);
     //this->getRootNode().setPosition(glm::vec3(0.0f,0.0f,-4.0f));
     //*/
     /*

@@ -26,7 +26,7 @@ namespace scene
 
     }
 
-    void SceneObject::render(glm::mat4 modelView, glm::mat4 projection)
+    void SceneObject::render(const glm::mat4 & modelView, const glm::mat4 & projection)
     {
 
         glUseProgram(m_shader->getProgramID());
