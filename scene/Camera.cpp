@@ -30,8 +30,8 @@ namespace scene
 
     void Camera::orientation(int xRel, int yRel, float sensibility)
     {
-        m_phi += -yRel*sensibility;
-        m_theta += +xRel*sensibility;
+        m_phi += +yRel*sensibility;
+        m_theta += -xRel*sensibility;
 
         if(m_phi > 89.0f)
         {
@@ -96,11 +96,11 @@ namespace scene
                     m_target = m_position + m_orientation;
                     break;
                 case Qt::Key_Left:
-                    m_position = m_position - m_sideMove * 0.5f;
+                    m_position = m_position + m_sideMove * 0.5f;
                     m_target = m_position + m_orientation;
                     break;
                 case Qt::Key_Right:
-                    m_position = m_position + m_sideMove * 0.5f;
+                    m_position = m_position - m_sideMove * 0.5f;
                     m_target = m_position + m_orientation;
                     break;
             }

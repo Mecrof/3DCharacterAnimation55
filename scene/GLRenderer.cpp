@@ -45,10 +45,17 @@ namespace scene
                 int yRel;
                 xRel = Mouse->x() - Mousex;
                 yRel = Mouse->y() - Mousey;
+                int xRelAbs = sqrt(xRel*xRel);
+                int yRelAbs = sqrt(yRel*yRel);
+                if(xRelAbs > 10 || yRelAbs > 10)
+                {
+                    xRel = 0;
+                    yRel = 0;
+                }
                 cam->orientation(xRel,yRel,0.5);
+                //std::cout << "Coordonnees : " << xRel << " " << yRel << std::endl;
                 Mousex = Mouse->x();
                 Mousey = Mouse->y();
-                std::cout << "Coordonnees : " << Mousex << " " << Mousey << std::endl;
             }
         }
 
