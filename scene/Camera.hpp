@@ -20,12 +20,14 @@ namespace scene
         Camera();
         ~Camera();
         Camera(glm::vec3 position, glm::vec3 cible, glm::vec3 axeVertical);
-        void orientation(int xRel, int yRel, float sensibilite);
+        void orientation(int xRel, int yRel, float sensivity);
         void move(QEvent *event);
         void lookat(glm::mat4 &modelview);
 
         void setTarget(glm::vec3 pointCible);
         void setPosition(glm::vec3 position);
+
+        void setSensivity(float sensivity);
 
 
     private:
@@ -36,6 +38,7 @@ namespace scene
         glm::vec3 m_sideMove;
         glm::vec3 m_position;
         glm::vec3 m_target;
+        float sensivity;
     };
 }
 #endif // CAMERA_HPP
