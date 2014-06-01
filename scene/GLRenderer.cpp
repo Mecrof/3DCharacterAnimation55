@@ -53,7 +53,8 @@ namespace scene
                     yRel = 0;
                 }
                 cam->orientation(xRel,yRel,0.5);
-                //std::cout << "Coordonnees : " << xRel << " " << yRel << std::endl;
+                //trackCam->OnMouseMotion(xRel,yRel);
+                std::cout << "Coordonnees : " << xRel << " " << yRel << std::endl;
                 Mousex = Mouse->x();
                 Mousey = Mouse->y();
             }
@@ -76,6 +77,7 @@ namespace scene
         }
         //#endif
         cam = new Camera(glm::vec3(3.0,2.149,2.617), glm::vec3(0,0,0), glm::vec3(0,1,0));
+        trackCam = new TrackCamera();
         m_modelView = glm::mat4(1.0);
         this->initialize();
     }
@@ -89,6 +91,7 @@ namespace scene
     void GLRenderer::paintGL()
     {
         cam->lookat(m_modelView);
+        //trackCam->look(m_modelView);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable( GL_DEPTH_TEST );
         m_rootNode->render(m_modelView, m_projection);

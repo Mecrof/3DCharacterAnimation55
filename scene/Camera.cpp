@@ -10,6 +10,7 @@ namespace scene
         m_sideMove = glm::vec3(0.0f, 0.0f, 0.0f);
         m_position = glm::vec3(0.0f, 0.0f, 0.0f);
         m_target = glm::vec3(0.0f, 0.0f, 0.0f);
+        sensivity = 0.5f;
     }
 
     Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 verticalaxis)
@@ -21,6 +22,7 @@ namespace scene
         m_sideMove = glm::vec3(0.0f, 0.0f, 0.0f);
         m_position = position;
         m_target = target;
+        sensivity = 0.5f;
     }
 
     Camera::~Camera()
@@ -30,17 +32,24 @@ namespace scene
 
     void Camera::orientation(int xRel, int yRel, float sensibility)
     {
-        m_phi += +yRel*sensibility;
-        m_theta += -xRel*sensibility;
+        // "-=" for trigonometric angles
+        m_phi   -= yRel*sensibility;
+        m_theta -= xRel*sensibility;
 
         if(m_phi > 89.0f)
         {
             m_phi = 89.0f;
         }
+        else if(m_phi < -89.0f)
+        {
+            m_phi = -89.0f;
+        }
+        /*
         else if(m_theta < -89.0f)
         {
             m_theta = -89.0f;
         }
+        */
 
         float phiRadian = m_phi * M_PI / 180;
         float thetaRadian = m_theta * M_PI / 180;
@@ -88,19 +97,19 @@ namespace scene
             switch(key->key())
             {
                 case Qt::Key_Up:
-                    m_position = m_position + m_orientation * 0.5f;
+                    m_position = m_position + m_orientation * sensivity;
                     m_target = m_position + m_orientation;
                     break;
                 case Qt::Key_Down:
-                    m_position = m_position - m_orientation * 0.5f;
+                    m_position = m_position - m_orientation * sensivity;
                     m_target = m_position + m_orientation;
                     break;
                 case Qt::Key_Left:
-                    m_position = m_position + m_sideMove * 0.5f;
+                    m_position = m_position + m_sideMove * sensivity;
                     m_target = m_position + m_orientation;
                     break;
                 case Qt::Key_Right:
-                    m_position = m_position - m_sideMove * 0.5f;
+                    m_position = m_position - m_sideMove * sensivity;
                     m_target = m_position + m_orientation;
                     break;
             }
@@ -162,6 +171,11 @@ namespace scene
 
         // Target
         m_target = m_position + m_orientation;
+    }
+
+    void Camera::setSensivity(float sensivity)
+    {
+        sensivity = sensivity;
     }
 
 }
