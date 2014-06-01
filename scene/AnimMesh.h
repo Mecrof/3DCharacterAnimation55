@@ -7,7 +7,8 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <assimp/scene.h>
-#include <assimp/cimport.h>
+//#include <assimp/cimport.h>
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include "SceneObject.hpp"
 #include "Light.hpp"
@@ -31,6 +32,10 @@ struct Vertex
         m_normal = normal;
     }
 };
+
+void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2);
+
+void cloneMatrix4x4ToASSIMP(aiMatrix4x4 & mat1, glm::mat4 & mat2);
 
 
 /*
@@ -61,6 +66,8 @@ class AnimMesh : public scene::SceneObject {
         void update(float);
         void render(const glm::mat4 & modelView, const glm::mat4 & projection);
 
+        void boneTransform(float timeInSecond, std::vector<glm::mat4> & transforms);
+
     private:
 
 #define INVALID_MATERIAL 0xFFFFFFFF
@@ -72,6 +79,7 @@ class AnimMesh : public scene::SceneObject {
 #define TEXCOORD_VB 3
 #define BONE_VB 4
 #define NUM_VBs 5
+#define MAX_BONES 100
 
     #define NUM_BONES_PER_VEREX 4
 
@@ -113,6 +121,14 @@ class AnimMesh : public scene::SceneObject {
         //void initMesh(unsigned int index, const aiMesh* paiMesh);
         bool initMaterials(const aiScene* pScene, const std::string& filename);
         void loadBones(uint meshIndex, const aiMesh * pMesh, std::vector<VertexBoneData> & bones);
+        const aiNodeAnim * FindNodeAnim(const aiAnimation * pAnimation, const std::string NodeName);
+        uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+        uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+        uint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+        void CalcInterpolatedScaling(aiVector3D &Out, float AnimationTime, const aiNodeAnim * pNodeAnim);
+        void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+        void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+        void readNodeHierarchy(float AnimationTime, const aiNode * pNode, const glm::mat4 & ParentTransform);
         void clear();
 
 
@@ -121,12 +137,22 @@ class AnimMesh : public scene::SceneObject {
         GLuint m_Buffers[NUM_VBs];
 
         scene::SpotLight::Light *m_light;
+        GLint m_idModelView;
+        GLint m_idProjection;
+        float m_runningTime;
+
         std::vector<MeshEntry> m_Entries;
         std::vector<BoneInfo> m_BoneInfo;
+        glm::mat4 m_GlobalInverseTransform;
         //std::vector<Texture*> m_Textures;
 
+        const aiScene * m_pScene;
+        Assimp::Importer m_Importer;
+        const aiAnimation * m_pAnimation;
+        const aiNode * m_pRootNode;
         std::map<std::string, uint> m_BoneMapping; // maps a bone name to its index
         uint m_NumBones;
+         GLuint m_boneLocation[MAX_BONES];
 };
 
 #endif // ANIMMESH_H

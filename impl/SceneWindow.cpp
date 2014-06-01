@@ -26,7 +26,8 @@ void SceneWindow::initialize()
     myMesh->init();
     */
     myMesh = new AnimMesh;
-    myMesh->loadMesh("./AnimatedPill.dae");
+
+    myMesh->loadMesh("./AnimatedPantin4.dae");
 //        myMesh->loadMesh("./Juliet_Striped_Bikini/Juliet_Striped_Bikini.dae");
     this->getRootNode().setObject(myMesh);
     this->getRootNode().scale(0.5f,0.5f,0.5f);
@@ -53,7 +54,9 @@ void SceneWindow::initialize()
 void SceneWindow::update(float tpf)
 {
     scene::Node & rootnode = getRootNode();
-    rootnode.rotate((M_PI/10.0f)*tpf, glm::vec3(0.0f, 1.0f, 0.0f));
+    //rootnode.translate(0.1f*tpf, 0.1f*tpf, 0.1f*tpf);
+    //rootnode.rotate((M_PI/10.0f)*tpf, glm::vec3(0.0f, 1.0f, 0.0f));
+    rootnode.getObject().update(tpf);
     /*
     if(subNode->getPosition().x > 1.5f || subNode->getPosition().x < -1.5f)
     {

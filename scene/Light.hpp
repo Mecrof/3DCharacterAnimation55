@@ -40,7 +40,7 @@ namespace scene
                 ~Light();
                 DirectionalLight* getLight();
                 Material* getMaterial();
-                void render(int);
+                void render(GLuint);
         };
 
     }

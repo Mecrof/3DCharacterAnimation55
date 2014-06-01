@@ -10,9 +10,9 @@ namespace SpotLight
         this->m_light = new DirectionalLight;
         this->m_material = new Material;
 
-        this->m_light->ambientColor[0] = 0.0f;
-        this->m_light->ambientColor[1] = 0.0f;
-        this->m_light->ambientColor[2] = 0.0f;
+        this->m_light->ambientColor[0] = 1.0f;
+        this->m_light->ambientColor[1] = 1.0f;
+        this->m_light->ambientColor[2] = 1.0f;
 
         this->m_light->diffuseColor[0] = 0.8f;
         this->m_light->diffuseColor[1] = 0.8f;
@@ -65,7 +65,7 @@ namespace SpotLight
         return this->m_material;
     }
 
-    void Light::render(int shaderId)
+    void Light::render(GLuint shaderId)
     {
         GLint lightId1 = glGetUniformLocation(shaderId, "u_directionalLight.ambientColor");
         GLint lightId2 = glGetUniformLocation(shaderId, "u_directionalLight.diffuseColor");

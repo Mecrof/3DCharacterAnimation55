@@ -20,7 +20,8 @@ SOURCES += \
     scene/Mesh.cpp \
     scene/Light.cpp \
     scene/Camera.cpp \
-    scene/AnimMesh.cpp
+    scene/AnimMesh.cpp \
+    scene/TrackCamera.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -35,7 +36,8 @@ HEADERS += \
     scene/Mesh.hpp \
     scene/Light.hpp \
     scene/Camera.hpp \
-    scene/AnimMesh.h
+    scene/AnimMesh.h \
+    scene/TrackCamera.hpp
 
 OTHER_FILES += \
     Shaders/texture.vert \
@@ -49,7 +51,5 @@ OTHER_FILES += \
     Shaders/light.vert \
     Shaders/light.frag \
     Suzanne.obj \
-    Assimp32d.dll \
-    feet_hands.dae \
-    Juliet_Striped_Bikini/Juliet_Striped_Bikini.dae \
-    AnimatedPill.dae
+    AnimatedPill.dae \
+    AnimatedPantin4.dae

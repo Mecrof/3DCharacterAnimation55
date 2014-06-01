@@ -77,7 +77,7 @@ namespace scene
         }
         //#endif
         cam = new Camera(glm::vec3(3.0,2.149,2.617), glm::vec3(0,0,0), glm::vec3(0,1,0));
-        trackCam = new TrackCamera();
+       // trackCam = new TrackCamera();
         m_modelView = glm::mat4(1.0);
         this->initialize();
     }

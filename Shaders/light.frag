@@ -26,16 +26,16 @@ varying vec3 v_posVertex;
 varying vec3 v_ecNormal;
 
 void main() {
-    if ( dot(v_posVertex,v_ecNormal) < 0 )
-    {
-        vec3 inverseVertex = normalize(-v_posVertex);
-        vec3 r = normalize(reflect(-u_directionalLight.direction,v_ecNormal));
 
-        vec4 ambiant = u_directionalLight.ambientColor * u_material.ambientFactor;
-        vec4 diffuse = clamp( u_directionalLight.diffuseColor * u_material.diffuseFactor * max(dot(v_ecNormal, u_directionalLight.direction), 0.0) , 0.0, 1.0);
-        vec4 spec = clamp( u_directionalLight.specularColor * u_material.specularFactor * pow(max(dot(r, inverseVertex), 0.0), 0.3*u_material.shininess), 0.0, 1.0);
-        gl_FragColor = ambiant + diffuse + spec;
-    }
+    Material material = u_material;
+    material.ambientFactor = vec4(0.1,0.1,0.1,1.0);
+    vec3 inverseVertex = normalize(-v_posVertex);
+    vec3 r = normalize(reflect(-u_directionalLight.direction,v_ecNormal));
+
+    vec4 ambiant = u_directionalLight.ambientColor * material.ambientFactor;
+    vec4 diffuse = clamp( u_directionalLight.diffuseColor * u_material.diffuseFactor * max(dot(v_ecNormal, u_directionalLight.direction), 0.0) , 0.0, 1.0);
+    vec4 spec = clamp( u_directionalLight.specularColor * u_material.specularFactor * pow(max(dot(r, inverseVertex), 0.0), 0.3*u_material.shininess), 0.0, 1.0);
+    gl_FragColor = ambiant + diffuse + spec;
 }
 
 /*
