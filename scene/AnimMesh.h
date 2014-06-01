@@ -6,12 +6,13 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <assimp/scene.h>
+#include <scene.h>
 //#include <assimp/cimport.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include <Importer.hpp>
+#include <postprocess.h>
 #include "SceneObject.hpp"
 #include "Light.hpp"
+#include "Texture.hpp"
 
 typedef unsigned int uint;
 
@@ -144,7 +145,7 @@ class AnimMesh : public scene::SceneObject {
         std::vector<MeshEntry> m_Entries;
         std::vector<BoneInfo> m_BoneInfo;
         glm::mat4 m_GlobalInverseTransform;
-        //std::vector<Texture*> m_Textures;
+        std::vector<Texture*> m_Textures;
 
         const aiScene * m_pScene;
         Assimp::Importer m_Importer;

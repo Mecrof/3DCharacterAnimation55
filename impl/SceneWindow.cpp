@@ -27,7 +27,7 @@ void SceneWindow::initialize()
     */
     myMesh = new AnimMesh;
 
-    myMesh->loadMesh("./AnimatedPantin4.dae");
+    myMesh->loadMesh("./ninja.b3d");
 //        myMesh->loadMesh("./Juliet_Striped_Bikini/Juliet_Striped_Bikini.dae");
     this->getRootNode().setObject(myMesh);
     this->getRootNode().scale(0.5f,0.5f,0.5f);

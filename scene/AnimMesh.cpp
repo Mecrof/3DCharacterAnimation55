@@ -1,44 +1,6 @@
 #include "AnimMesh.h"
 
-#include <assimp/matrix4x4.h>
-
-/*
-//MeshEntry
-MeshEntry::MeshEntry()
-{
-    VB = INVALID_VALUE;
-    IB = INVALID_VALUE;
-    m_numIndices  = 0;
-    m_materialIndex = INVALID_MATERIAL;
-};
-
-MeshEntry::~MeshEntry()
-{
-    if (VB != INVALID_VALUE)
-    {
-        glDeleteBuffers(1, &VB);
-    }
-
-    if (IB != INVALID_VALUE)
-    {
-        glDeleteBuffers(1, &IB);
-    }
-}
-
-void MeshEntry::init(const std::vector<Vertex>& Vertices,
-                          const std::vector<unsigned int>& Indices)
-{
-    m_numIndices = Indices.size();
-
-    glGenBuffers(1, &VB);
-    glBindBuffer(GL_ARRAY_BUFFER, VB);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * Vertices.size(), &Vertices[0], GL_STATIC_DRAW);
-
-    glGenBuffers(1, &IB);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * m_numIndices, &Indices[0], GL_STATIC_DRAW);
-}
-*/
+#include <matrix4x4.h>
 
 void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
 {
@@ -129,25 +91,13 @@ bool AnimMesh::loadMesh(const std::string& filename)
     glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
 
     bool ret = false;
-    m_pScene = m_Importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_GenSmoothNormals);
+    m_pScene = m_Importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
     m_pAnimation = m_pScene->mAnimations[0];
     m_pRootNode = m_pScene->mRootNode;
 
     if (m_pScene) {
         cloneMatrix4x4ToGLM(m_GlobalInverseTransform, m_pScene->mRootNode->mTransformation);
-        std::cout << "m_GlobalInverseTransform="<<std::endl;
-        std::cout << m_GlobalInverseTransform[0][0] << "\t" << m_GlobalInverseTransform[0][1] << "\t" << m_GlobalInverseTransform[0][2] << "\t" << m_GlobalInverseTransform[0][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[1][0] << "\t" << m_GlobalInverseTransform[1][1] << "\t" << m_GlobalInverseTransform[1][2] << "\t" << m_GlobalInverseTransform[1][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[2][0] << "\t" << m_GlobalInverseTransform[2][1] << "\t" << m_GlobalInverseTransform[2][2] << "\t" << m_GlobalInverseTransform[2][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[3][0] << "\t" << m_GlobalInverseTransform[3][1] << "\t" << m_GlobalInverseTransform[3][2] << "\t" << m_GlobalInverseTransform[3][3] << std::endl;
-
         m_GlobalInverseTransform = glm::inverse(m_GlobalInverseTransform);
-
-        std::cout << "m_GlobalInverseTransform=inversed"<<std::endl;
-        std::cout << m_GlobalInverseTransform[0][0] << "\t" << m_GlobalInverseTransform[0][1] << "\t" << m_GlobalInverseTransform[0][2] << "\t" << m_GlobalInverseTransform[0][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[1][0] << "\t" << m_GlobalInverseTransform[1][1] << "\t" << m_GlobalInverseTransform[1][2] << "\t" << m_GlobalInverseTransform[1][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[2][0] << "\t" << m_GlobalInverseTransform[2][1] << "\t" << m_GlobalInverseTransform[2][2] << "\t" << m_GlobalInverseTransform[2][3] << std::endl;
-        std::cout << m_GlobalInverseTransform[3][0] << "\t" << m_GlobalInverseTransform[3][1] << "\t" << m_GlobalInverseTransform[3][2] << "\t" << m_GlobalInverseTransform[3][3] << std::endl;
 
         ret = initFromScene(m_pScene, filename);
     }
@@ -164,7 +114,7 @@ bool AnimMesh::loadMesh(const std::string& filename)
 bool AnimMesh::initFromScene(const aiScene* pScene, const std::string& filename)
 {
     m_Entries.resize(pScene->mNumMeshes);
-    //m_Textures.resize(pScene->mNumMaterials);
+    m_Textures.resize(pScene->mNumMaterials);
 
     // Prepare vectors for vertex attributes and indices
     std::vector<glm::vec3> Positions;
@@ -237,8 +187,7 @@ bool AnimMesh::initFromScene(const aiScene* pScene, const std::string& filename)
     glBufferData(GL_ARRAY_BUFFER, sizeof(bones[0]) * bones.size(), &bones[0], GL_STATIC_DRAW);
     GLint idBone = glGetAttribLocation(m_shader->getProgramID(), "in_BoneIDs");
     glEnableVertexAttribArray(idBone);
-        glVertexAttribPointer(idBone, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
-//    glVertexAttribIPointer(idBone, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+    glVertexAttribPointer(idBone, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
     GLint idBoneWeight = glGetAttribLocation(m_shader->getProgramID(), "in_BoneWeight");
     glEnableVertexAttribArray(idBoneWeight);
     glVertexAttribPointer(idBoneWeight, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
@@ -251,21 +200,6 @@ bool AnimMesh::initFromScene(const aiScene* pScene, const std::string& filename)
 
     return true;
 }
-
-/*
-bool AnimMesh::initFromScene(const aiScene* pScene, const std::string& filename)
-{
-    m_Entries.resize(pScene->mNumMeshes);
-    //m_Textures.resize(pScene->mNumMaterials);
-
-    // Initialize the meshes in the scene one by one
-    for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-        const aiMesh* paiMesh = pScene->mMeshes[i];
-        initMesh(i, paiMesh);
-    }
-
-    return true;//InitMaterials(pScene, Filename);
-}*/
 
 void AnimMesh::initMesh(uint meshIndex,
                         const aiMesh* paiMesh,
@@ -301,56 +235,34 @@ void AnimMesh::initMesh(uint meshIndex,
    }
 }
 
-/*
-void AnimMesh::initMesh(unsigned int index, const aiMesh* paiMesh)
-{
-    m_Entries[index].m_materialIndex = paiMesh->mMaterialIndex;
-
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-
-    const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
-
-    for (unsigned int i = 0 ; i < paiMesh->mNumVertices ; i++)
-    {
-        const aiVector3D* pPos = &(paiMesh->mVertices[i]);
-        const aiVector3D* pNormal = paiMesh->HasNormals() ? &(paiMesh->mNormals[i]) : &zero3D;
-        //const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;
-
-        Vertex v(glm::vec3(pPos->x, pPos->y, pPos->z),
-               glm::vec2(0.0, 0.0),
-               glm::vec3(pNormal->x, pNormal->y, pNormal->z));
-
-        vertices.push_back(v);
-    }
-
-    for (unsigned int i = 0 ; i < paiMesh->mNumFaces ; i++)
-    {
-        const aiFace& Face = paiMesh->mFaces[i];
-        assert(Face.mNumIndices == 3);
-        indices.push_back(Face.mIndices[0]);
-        indices.push_back(Face.mIndices[1]);
-        indices.push_back(Face.mIndices[2]);
-    }
-
-    m_Entries[index].init(vertices, indices);
-}
-*/
 
 bool AnimMesh::initMaterials(const aiScene* pScene, const std::string& filename)
 {
-    /*for (unsigned int i = 0 ; i < pScene->mNumMaterials ; i++)
+    bool Ret;
+
+    for (unsigned int i = 0 ; i < pScene->mNumMaterials ; i++)
     {
         const aiMaterial* pMaterial = pScene->mMaterials[i];
         m_Textures[i] = NULL;
         if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             aiString Path;
+            std::string dir = ".";
 
             if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                std::string FullPath = Dir + "/" + Path.data;
+               // std::string FullPath = dir + Path.C_Str();
+
+                std::string p(Path.data);
+
+                std::string::size_type SlashIndex = p.find_last_of("/");
+
+                    p = p.substr(SlashIndex + 1, filename.length() + 1);
+
+
+                 std::string FullPath = dir + "/" + p;
+std::cout << FullPath << std::endl;
                 m_Textures[i] = new Texture(GL_TEXTURE_2D, FullPath.c_str());
 
-                if (!m_Textures[i]->Load()) {
+                if (!m_Textures[i]->load()) {
                     printf("Error loading texture '%s'\n", FullPath.c_str());
                     delete m_Textures[i];
                     m_Textures[i] = NULL;
@@ -361,11 +273,62 @@ bool AnimMesh::initMaterials(const aiScene* pScene, const std::string& filename)
 
         if (!m_Textures[i]) {
             m_Textures[i] = new Texture(GL_TEXTURE_2D, "./white.png");
-            Ret = m_Textures[i]->Load();
+            Ret = m_Textures[i]->load();
         }
     }
 
-    return Ret;*/
+    return Ret;
+
+    // Extract the directory part from the file name
+  /*  string::size_type SlashIndex = Filename.find_last_of("/");
+    string Dir;
+
+    if (SlashIndex == string::npos) {
+        Dir = ".";
+    }
+    else if (SlashIndex == 0) {
+        Dir = "/";
+    }
+    else {
+        Dir = Filename.substr(0, SlashIndex);
+    }
+
+    bool Ret = true;
+
+    // Initialize the materials
+    for (uint i = 0 ; i < pScene->mNumMaterials ; i++) {
+        const aiMaterial* pMaterial = pScene->mMaterials[i];
+
+        m_Textures[i] = NULL;
+
+        if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+            aiString Path;
+
+            if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
+                string p(Path.data);
+
+                if (p.substr(0, 2) == ".\\") {
+                    p = p.substr(2, p.size() - 2);
+                }
+
+                string FullPath = Dir + "/" + p;
+
+                m_Textures[i] = new Texture(GL_TEXTURE_2D, FullPath.c_str());
+
+                if (!m_Textures[i]->Load()) {
+                    printf("Error loading texture '%s'\n", FullPath.c_str());
+                    delete m_Textures[i];
+                    m_Textures[i] = NULL;
+                    Ret = false;
+                }
+                else {
+                    printf("%d - loaded texture '%s'\n", i, FullPath.c_str());
+                }
+            }
+        }
+    }*/
+
+    return Ret;
     return true;
 }
 
@@ -389,7 +352,7 @@ void AnimMesh::loadBones(uint meshIndex, const aiMesh *pMesh, std::vector<AnimMe
 
         m_BoneMapping[BoneName] = BoneIndex;
         cloneMatrix4x4ToGLM(m_BoneInfo[BoneIndex].BoneOffset, pMesh->mBones[i]->mOffsetMatrix);
-       // m_BoneInfo[BoneIndex].BoneOffset = m_BoneInfo[BoneIndex].BoneOffset * glm::inverse(m_GlobalInverseTransform);
+
 
         for (uint j = 0 ; j < pMesh->mBones[i]->mNumWeights ; j++) {
             uint VertexID = m_Entries[meshIndex].baseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
@@ -489,7 +452,7 @@ void AnimMesh::CalcInterpolatedRotation(aiQuaternion &Out, float AnimationTime, 
     assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
     float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
     float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
+    //assert(Factor >= 0.0f && Factor <= 1.0f);
     const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
     const aiQuaternion& EndRotationQ   = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
     aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
@@ -508,7 +471,7 @@ void AnimMesh::CalcInterpolatedPosition(aiVector3D &Out, float AnimationTime, co
     assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
     float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
     float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
+    //  assert(Factor >= 0.0f && Factor <= 1.0f);
     const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
     const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
     aiVector3D Delta = End - Start;
@@ -552,7 +515,7 @@ void AnimMesh::readNodeHierarchy(float AnimationTime, const aiNode *pNode, const
        TranslationM[0][3] = Translation.x;
        TranslationM[1][3] = Translation.y;
        TranslationM[2][3] = Translation.z;
-       //std::cout << Translation.x  << " " << Translation.y << " " << Translation.z << std::endl;
+
        // Combine the above transformations
        glm::mat4 tmp;
        tmp[0][0]= -1; tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 0;
@@ -560,14 +523,8 @@ void AnimMesh::readNodeHierarchy(float AnimationTime, const aiNode *pNode, const
        tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= -1; tmp[0][0]= 0;
        tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 1;
        NodeTransformation = RotationM * TranslationM;
-       /*
-       std::cout << "Name="<<NodeName<<std::endl;
-       std::cout << NodeTransformation[0][0] << " " << NodeTransformation[0][1] << " " << NodeTransformation[0][2] << " " << NodeTransformation[0][3] << std::endl;
-       std::cout << NodeTransformation[1][0] << " " << NodeTransformation[1][1] << " " << NodeTransformation[1][2] << " " << NodeTransformation[1][3] << std::endl;
-       std::cout << NodeTransformation[2][0] << " " << NodeTransformation[2][1] << " " << NodeTransformation[2][2] << " " << NodeTransformation[2][3] << std::endl;
-       std::cout << NodeTransformation[3][0] << " " << NodeTransformation[3][1] << " " << NodeTransformation[3][2] << " " << NodeTransformation[3][3] << std::endl;
-       */
    }
+
    glm::mat4 GlobalTransformation =  NodeTransformation * ParentTransform;
    if (m_BoneMapping.find(NodeName) != m_BoneMapping.end())
    {
@@ -610,11 +567,11 @@ AnimMesh::render(const glm::mat4 &modelView, const glm::mat4 &projection)
 
         for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
 
-            //const unsigned int MaterialIndex = m_Entries[i].MaterialIndex;
-            //assert(MaterialIndex < m_Textures.size());
-//            if (m_Textures[MaterialIndex]) {
-//                m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
- //           }
+            const unsigned int MaterialIndex = m_Entries[i].materialIndex;
+            assert(MaterialIndex < m_Textures.size());
+            if (m_Textures[MaterialIndex]) {
+               m_Textures[MaterialIndex]->bind(GL_TEXTURE0);
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES,
                                       m_Entries[i].numIndices,
                                       GL_UNSIGNED_INT,
@@ -644,50 +601,6 @@ void AnimMesh::boneTransform(float timeInSecond, std::vector<glm::mat4> &transfo
         transforms[i] = m_BoneInfo[i].FinalTransformation;// * Identity;
     }
 }
-
-/*
-void
-AnimMesh::render(const glm::mat4 &modelView, const glm::mat4 &projection)
-{
-    glUseProgram(m_shader->getProgramID());
-
-        this->m_light->render(m_shader->getProgramID());
-
-        GLint idVertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
-        GLint idNormal = glGetAttribLocation(m_shader->getProgramID(), "in_Normal");
-        GLint idModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
-        GLint idProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
-
-        glEnableVertexAttribArray(idVertex);
-        glEnableVertexAttribArray(idNormal);
-
-        glUniformMatrix4fv(idModelView, 1, GL_FALSE, glm::value_ptr(modelView) );
-        glUniformMatrix4fv(idProjection, 1, GL_FALSE, glm::value_ptr(projection) );
-
-        for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-            glBindBuffer(GL_ARRAY_BUFFER, m_Entries[i].VB);
-            glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-            glVertexAttribPointer(idNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)20);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Entries[i].IB);
-
-            //const unsigned int MaterialIndex = m_Entries[i].MaterialIndex;
-
-//            if (MaterialIndex < m_Textures.size() && m_Textures[MaterialIndex]) {
-//                m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
- //           }
-
-            glDrawElements(GL_TRIANGLES, m_Entries[i].m_numIndices, GL_UNSIGNED_INT, 0);
-        }
-
-       // glDrawArrays(GL_TRIANGLES, 0, this->m_numFaces);
-
-        glDisableVertexAttribArray(idVertex);
-        glDisableVertexAttribArray(idNormal);
-
-        glUseProgram(0);
-}
-*/
 
 
 void AnimMesh::VertexBoneData::addBoneData(uint boneID, float weight)

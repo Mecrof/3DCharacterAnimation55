@@ -18,6 +18,7 @@ uniform mat4 gBones[MAX_BONES];
 // Varying
 varying vec3 v_posVertex;
 varying vec3 v_ecNormal;
+out vec2 v_TexCoord;
 
 void main() {
     mat4 BoneTransform = gBones[int(in_BoneIDs[0])]* in_BoneWeight[0];
@@ -31,6 +32,7 @@ void main() {
     v_ecNormal = normalize(vec3(modelview * BoneTransform * vec4(in_Normal, 0.0)));
 
     gl_Position =  projection * modelview * pos;
+    v_TexCoord  = in_TexCoord;
 }
 
 /*
