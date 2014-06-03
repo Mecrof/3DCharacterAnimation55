@@ -31,7 +31,7 @@ uniform sampler2D sampler;
 void main() {
 
     Material material = u_material;
-    material.ambientFactor = vec4(0.1,0.1,0.1,1.0);
+    material.ambientFactor = vec4(0.3,0.3,0.3,1.0);
     vec3 inverseVertex = normalize(-v_posVertex);
     vec3 r = normalize(reflect(-u_directionalLight.direction,v_ecNormal));
 

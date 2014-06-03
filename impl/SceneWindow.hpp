@@ -17,6 +17,9 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
+    void setModel(QString);
+    void runAnimation(int i);
+    void addAnimation(const std::string& file_name);
 
     AnimMesh * myMesh;
     Triangle * triangle;
@@ -24,7 +27,6 @@ public:
     scene::Node * subNode;
 
     float factor;
-
 
 };
 

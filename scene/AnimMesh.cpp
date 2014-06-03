@@ -2,6 +2,15 @@
 
 #include <matrix4x4.h>
 
+/**************************************************************************
+* Name: cloneMatrix4x4ToGLM
+* Description: clone an assimp 4x4 matrix to a glm 4x4 matrix
+* Inputs:
+- parameter1: a dest glm matrix
+- parameter2: a source assimp matrix
+* Returns:
+- value: void
+**************************************************************************/
 void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
 {
     mat1[0][0] = mat2[0][0];
@@ -25,6 +34,15 @@ void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
     mat1[3][3] = mat2[3][3];
 }
 
+/**************************************************************************
+* Name: cloneMatrix4x4ToASSIMP
+* Description: clone an glm 4x4 matrix to a assimp 4x4 matrix
+* Inputs:
+- parameter1: a dest assimp matrix
+- parameter2: a source glm matrix
+* Returns:
+- value: void
+**************************************************************************/
 void cloneMatrix4x4ToASSIMP(aiMatrix4x4 & mat1, glm::mat4 & mat2)
 {
     mat1[0][0] = mat2[0][0];
@@ -48,571 +66,853 @@ void cloneMatrix4x4ToASSIMP(aiMatrix4x4 & mat1, glm::mat4 & mat2)
     mat1[3][3] = mat2[3][3];
 }
 
-//AnimMesh
+/**************************************************************************
+* Name: AnimMesh
+* Description: constructor
+**************************************************************************/
 AnimMesh::AnimMesh()
 {
-    this->m_light = new scene::SpotLight::Light;
+    this->m_Light = new scene::SpotLight::Light;
 
     this->m_shader = new scene::Shader("./Shaders/light.vert", "./Shaders/light.frag");
     this->m_shader->bind();
 
-    m_idModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
-    m_idProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
+    m_IdModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
+    m_IdProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
 
-    for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(m_boneLocation); i++)
+    for (GLuint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(this->m_BoneLocation); i++)
     {
-        char Name[128];
-        memset(Name, 0, sizeof(Name));
-        snprintf(Name, sizeof(Name), "gBones[%d]", i);
-        m_boneLocation[i] = glGetUniformLocation(m_shader->getProgramID(), Name);
+        char name[128];
+        memset(name, 0, sizeof(name));
+        snprintf(name, sizeof(name), "gBones[%d]", i);
+        this->m_BoneLocation[i] = glGetUniformLocation(m_shader->getProgramID(), name);
     }
 
-    m_runningTime = 0.01f;
+    this->m_RunningTime = 0.01f;
 
+    this->m_IsLoading = false;
 }
 
+/**************************************************************************
+* Name: ~AnimMesh
+* Description: destructor
+**************************************************************************/
 AnimMesh::~AnimMesh()
 {
-    glDeleteVertexArrays(1, &m_VAO);
-    delete m_light;
-
+    this->clear();
+    delete  this->m_Light;
+    delete  this->m_Importer;
 }
 
-bool AnimMesh::loadMesh(const std::string& filename)
+
+/**************************************************************************
+* Name: clear
+* Description: clear the data loaded for the current mesh
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::clear()
 {
+    for (GLuint i = 0 ; i < this->m_Textures.size() ; i++) {
+        SAFE_DELETE(m_Textures[i]);
+    }
+
+    if (m_Buffers[0] != 0) {
+        glDeleteBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
+    }
+
+    if (m_VAO != 0) {
+        glDeleteVertexArrays(1, &m_VAO);
+        m_VAO = 0;
+    }
+
+    if(this->m_Importer)
+    {
+        this->m_Importer->FreeScene();
+        delete m_Importer;
+    }
+
+    this->m_Animations.clear();
+}
+
+/**************************************************************************
+* Name: loadMesh
+* Description: load a mesh and initialize the data
+* Inputs:
+- parameter1: the path to the mesh
+* Returns:
+- value: true if the mesh is successfully loaded
+**************************************************************************/
+bool AnimMesh::loadMesh(const std::string& file_name)
+{
+    this->m_IsLoading = true;
+
     // Release the previously loaded mesh (if it exists)
-    //Clear();
+    this->clear();
+
+    //create a new importer
+    this->m_Importer = new Assimp::Importer;
 
     // Create the VAO
-    glGenVertexArrays(1, &m_VAO);
-    glBindVertexArray(m_VAO);
+    glGenVertexArrays(1, &this->m_VAO);
+    glBindVertexArray(this->m_VAO);
 
     // Create the buffers for the vertices atttributes
-    glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
+    glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(this->m_Buffers), this->m_Buffers);
 
     bool ret = false;
-    m_pScene = m_Importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
-    m_pAnimation = m_pScene->mAnimations[0];
-    m_pRootNode = m_pScene->mRootNode;
+    this->m_Scene = this->m_Importer->ReadFile(file_name.c_str(), aiProcess_FixInfacingNormals | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
-    if (m_pScene) {
-        cloneMatrix4x4ToGLM(m_GlobalInverseTransform, m_pScene->mRootNode->mTransformation);
-        m_GlobalInverseTransform = glm::inverse(m_GlobalInverseTransform);
-
-        ret = initFromScene(m_pScene, filename);
+    if(this->m_Scene->HasAnimations())
+    {
+        this->m_Animations.push_back(this->m_Scene->mAnimations[0]);
+        this->m_Animation = this->m_Scene->mAnimations[0];
+        this->m_AnimationSelected = true;
     }
-    else {
-        printf("Error parsing '%s': '%s'\n", filename.c_str(), m_Importer.GetErrorString());
+
+    this->m_RootNode = this->m_Scene->mRootNode;
+
+    if(this->m_Scene)
+    {
+        ret = this->initFromScene(this->m_Scene, file_name);
+    }
+    else
+    {
+        printf("Error parsing '%s': '%s'\n", file_name.c_str(), m_Importer->GetErrorString());
     }
 
     // Make sure the VAO is not changed from outside code
     glBindVertexArray(0);
 
+    this->m_IsLoading = false;
+
     return ret;
 }
 
-bool AnimMesh::initFromScene(const aiScene* pScene, const std::string& filename)
+/**************************************************************************
+* Name: addAnimation
+* Description: initialize the data from the scene
+* Inputs:
+- parameter1: a pointer to the current scene
+* Returns:
+- value:
+**************************************************************************/
+std::string AnimMesh::addAnimation(const std::string &file_name)
 {
-    m_Entries.resize(pScene->mNumMeshes);
-    m_Textures.resize(pScene->mNumMaterials);
+    Assimp::Importer * importer = new Assimp::Importer();
+    this->m_Importers.push_back(importer);
+    const aiScene * tmp_scene = importer->ReadFile(file_name.c_str(), 0);
 
-    // Prepare vectors for vertex attributes and indices
-    std::vector<glm::vec3> Positions;
-    std::vector<glm::vec3> Normals;
-    std::vector<glm::vec2> TexCoords;
+    if(tmp_scene)
+    {
+        if(tmp_scene->HasAnimations())
+        {
+            this->m_Animations.push_back(tmp_scene->mAnimations[0]);
+            return tmp_scene->mAnimations[0]->mName.C_Str();
+        }
+    }
+    else
+    {
+        printf("Error parsing '%s': '%s'\n", file_name.c_str(), importer->GetErrorString());
+    }
+
+    return NULL;
+}
+
+/**************************************************************************
+* Name: runAnimation
+* Description: initialize the data from the scene
+* Inputs:
+- parameter1: a pointer to the current scene
+* Returns:
+- value:
+**************************************************************************/
+bool AnimMesh::runAnimation(int index)
+{
+    const aiAnimation * animation = this->m_Animations[index];
+
+    if(animation)
+    {
+        this->m_Animation = animation;
+        this->m_AnimationSelected = true;
+        return true;
+    }
+
+    return false;
+}
+
+/**************************************************************************
+* Name: runAnimation
+* Description: initialize the data from the scene
+* Inputs:
+- parameter1: a pointer to the current scene
+* Returns:
+- value:
+**************************************************************************/
+const std::vector<const aiAnimation*> AnimMesh::getAnimations()
+{
+    return this->m_Animations;
+}
+
+/**************************************************************************
+* Name: initFromScene
+* Description: initialize the data from the scene
+* Inputs:
+- parameter1: a pointer to the current scene
+- parameter2: the path to the mesh
+* Returns:
+- value: true if the mesh is successfully initialized
+**************************************************************************/
+bool AnimMesh::initFromScene(const aiScene* scene, const std::string& file_name)
+{
+    this->m_Entries.resize(scene->mNumMeshes);
+    this->m_Textures.resize(scene->mNumMaterials);
+
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> textures;
     std::vector<VertexBoneData> bones;
-    std::vector<unsigned int> Indices;
+    std::vector<GLuint> indices;
 
-    unsigned int NumVertices = 0;
-    unsigned int NumIndices = 0;
+    GLuint num_vertices = 0;
+    GLuint num_indices = 0;
 
-    // Count the number of vertices and indices
-    for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-        m_Entries[i].materialIndex  = pScene->mMeshes[i]->mMaterialIndex;
-        m_Entries[i].numIndices     = pScene->mMeshes[i]->mNumFaces * 3;
-        m_Entries[i].baseVertex     = NumVertices;
-        m_Entries[i].baseIndex      = NumIndices;
+    for (GLuint i = 0 ; i < this->m_Entries.size() ; i++)
+    {
+        this->m_Entries[i].m_MaterialIndex  = scene->mMeshes[i]->mMaterialIndex;
+        this->m_Entries[i].m_NumIndices     = scene->mMeshes[i]->mNumFaces * 3;
+        this->m_Entries[i].m_BaseVertex     = num_vertices;
+        this->m_Entries[i].m_BaseIndex      = num_indices;
 
-        NumVertices += pScene->mMeshes[i]->mNumVertices;
-        NumIndices  += m_Entries[i].numIndices;
+        num_vertices += scene->mMeshes[i]->mNumVertices;
+        num_indices  += m_Entries[i].m_NumIndices;
     }
 
-    // Reserve space in the vectors for the vertex attributes and indices
-    Positions.reserve(NumVertices);
-    Normals.reserve(NumVertices);
-    TexCoords.reserve(NumVertices);
-    bones.resize(NumVertices);
-    Indices.reserve(NumIndices);
+    positions.reserve(num_vertices);
+    normals.reserve(num_vertices);
+    textures.reserve(num_vertices);
+    bones.resize(num_vertices);
+    indices.reserve(num_indices);
 
-    // Initialize the meshes in the scene one by one
-    for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-        const aiMesh* paiMesh = pScene->mMeshes[i];
-        initMesh(i, paiMesh, Positions, Normals, TexCoords, bones, Indices);
+    for (GLuint i = 0 ; i < this->m_Entries.size() ; i++)
+    {
+        const aiMesh* ai_mesh = scene->mMeshes[i];
+        initMesh(i, ai_mesh, positions, normals, textures, bones, indices);
     }
 
-    if (!initMaterials(pScene, filename)) {
+    if (!initMaterials(scene, file_name))
+    {
         return false;
     }
 
-
-    // Generate and populate the buffers with vertex attributes and the indices
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POS_VB]);
-    glBufferData(   GL_ARRAY_BUFFER,
-                    sizeof(Positions[0]) * Positions.size(),
-                    &Positions[0],
-                    GL_STATIC_DRAW);
-    GLint idVertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
-    glEnableVertexAttribArray(idVertex);
-    glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0]) * positions.size(), &positions[0], GL_STATIC_DRAW);
+
+    GLint id_vertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
+    glEnableVertexAttribArray(id_vertex);
+    glVertexAttribPointer(id_vertex, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[TEXCOORD_VB]);
-    glBufferData(   GL_ARRAY_BUFFER,
-                    sizeof(TexCoords[0]) * TexCoords.size(),
-                    &TexCoords[0],
-                    GL_STATIC_DRAW);
-    GLint idTexCoord = glGetAttribLocation(m_shader->getProgramID(), "in_TexCoord");
-    glEnableVertexAttribArray(idTexCoord);
-    glVertexAttribPointer(idTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(textures[0]) * textures.size(), &textures[0], GL_STATIC_DRAW);
+
+    GLint id_tex_coord = glGetAttribLocation(m_shader->getProgramID(), "in_TexCoord");
+    glEnableVertexAttribArray(id_tex_coord);
+    glVertexAttribPointer(id_tex_coord, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[NORMAL_VB]);
-    glBufferData(   GL_ARRAY_BUFFER,
-                    sizeof(Normals[0]) * Normals.size(),
-                    &Normals[0],
-                    GL_STATIC_DRAW);
-    GLint idNormal = glGetAttribLocation(m_shader->getProgramID(), "in_Normal");
-    glEnableVertexAttribArray(idNormal);
-    glVertexAttribPointer(idNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(normals[0]) * normals.size(), &normals[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    GLint id_normal = glGetAttribLocation(m_shader->getProgramID(), "in_Normal");
+    glEnableVertexAttribArray(id_normal);
+    glVertexAttribPointer(id_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[BONE_VB]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(bones[0]) * bones.size(), &bones[0], GL_STATIC_DRAW);
-    GLint idBone = glGetAttribLocation(m_shader->getProgramID(), "in_BoneIDs");
-    glEnableVertexAttribArray(idBone);
-    glVertexAttribPointer(idBone, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
-    GLint idBoneWeight = glGetAttribLocation(m_shader->getProgramID(), "in_BoneWeight");
-    glEnableVertexAttribArray(idBoneWeight);
-    glVertexAttribPointer(idBoneWeight, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
-    glBufferData(   GL_ELEMENT_ARRAY_BUFFER,
-                    sizeof(Indices[0]) * Indices.size(),
-                    &Indices[0],
-                    GL_STATIC_DRAW);
+    GLint id_bone = glGetAttribLocation(m_shader->getProgramID(), "in_BoneIDs");
+    glEnableVertexAttribArray(id_bone);
+    glVertexAttribPointer(id_bone, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
+
+    GLint id_bone_weight = glGetAttribLocation(m_shader->getProgramID(), "in_BoneWeight");
+    glEnableVertexAttribArray(id_bone_weight);
+    glVertexAttribPointer(id_bone_weight, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
 
     return true;
 }
 
-void AnimMesh::initMesh(uint meshIndex,
-                        const aiMesh* paiMesh,
+/**************************************************************************
+* Name: initMesh
+* Description: initialize the data of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::initMesh(GLuint mesh_index,
+                        const aiMesh* ai_mesh,
                         std::vector<glm::vec3> &positions,
                         std::vector<glm::vec3> &normals,
-                        std::vector<glm::vec2> &texCoords,
+                        std::vector<glm::vec2> &textures,
                         std::vector<VertexBoneData> &bones,
-                        std::vector<unsigned int> &indices)
+                        std::vector<GLuint> &indices)
 {
-    const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
 
+   const aiVector3D null_vector(0.0f, 0.0f, 0.0f);
 
-   // Populate the vertex attribute vectors
-   for (unsigned int i = 0 ; i < paiMesh->mNumVertices ; i++) {
-       const aiVector3D* pPos = &(paiMesh->mVertices[i]);
-       const aiVector3D* pNormal = paiMesh->HasNormals() ? &(paiMesh->mNormals[i]) : &zero3D;
-       const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &zero3D;
+   for (GLuint i = 0 ; i < ai_mesh->mNumVertices ; i++)
+   {
+       const aiVector3D* pos = &(ai_mesh->mVertices[i]);
+       const aiVector3D* norms = ai_mesh->HasNormals() ? &(ai_mesh->mNormals[i]) : &null_vector;
+       const aiVector3D* texs = ai_mesh->HasTextureCoords(0) ? &(ai_mesh->mTextureCoords[0][i]) : &null_vector;
 
-       positions.push_back(glm::vec3(pPos->x, pPos->y, pPos->z));
-       normals.push_back(glm::vec3(pNormal->x, pNormal->y, pNormal->z));
-       texCoords.push_back(glm::vec2(pTexCoord->x, pTexCoord->y));
+       positions.push_back(glm::vec3(pos->x, pos->y, pos->z));
+       normals.push_back(glm::vec3(norms->x, norms->y, norms->z));
+       textures.push_back(glm::vec2(texs->x, texs->y));
    }
 
-   loadBones(meshIndex, paiMesh, bones);
+   loadBones(mesh_index, ai_mesh, bones);
 
-   // Populate the index buffer
-   for (unsigned int i = 0 ; i < paiMesh->mNumFaces ; i++) {
-       const aiFace& face = paiMesh->mFaces[i];
-       assert(face.mNumIndices == 3);
+   for (unsigned int i = 0 ; i < ai_mesh->mNumFaces ; i++)
+   {
+       const aiFace& face = ai_mesh->mFaces[i];
        indices.push_back(face.mIndices[0]);
        indices.push_back(face.mIndices[1]);
        indices.push_back(face.mIndices[2]);
    }
 }
 
-
-bool AnimMesh::initMaterials(const aiScene* pScene, const std::string& filename)
+/**************************************************************************
+* Name: loadBones
+* Description: initialize the data of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::loadBones(GLuint mesh_index, const aiMesh *ai_mesh, std::vector<VertexBoneData> &bones)
 {
-    bool Ret;
-
-    for (unsigned int i = 0 ; i < pScene->mNumMaterials ; i++)
+    for(GLuint i = 0 ; i < ai_mesh->mNumBones ; i++)
     {
-        const aiMaterial* pMaterial = pScene->mMaterials[i];
-        m_Textures[i] = NULL;
-        if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-            aiString Path;
-            std::string dir = ".";
+        GLuint bone_index = 0;
+        std::string bone_name(ai_mesh->mBones[i]->mName.data);
 
-            if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-               // std::string FullPath = dir + Path.C_Str();
+        if (this->m_BoneMapping.find(bone_name) == this->m_BoneMapping.end())
+        {
+            bone_index = this->m_NumBones;
+            this->m_NumBones++;
+            BoneInfo bone_info;
+            this->m_BoneInfo.push_back(bone_info);
+            cloneMatrix4x4ToGLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
+            this->m_BoneMapping[bone_name] = bone_index;
+        }
+        else
+        {
+            bone_index = this->m_BoneMapping[bone_name];
+        }
 
-                std::string p(Path.data);
+        this->m_BoneMapping[bone_name] = bone_index;
+        cloneMatrix4x4ToGLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
 
-                std::string::size_type SlashIndex = p.find_last_of("/");
+        for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++)
+        {
+            GLuint vertex_id = this->m_Entries[mesh_index].m_BaseVertex + ai_mesh->mBones[i]->mWeights[j].mVertexId;
+            float weight = ai_mesh->mBones[i]->mWeights[j].mWeight;
+            bones[vertex_id].addBoneData(bone_index, weight);
+        }
+    }
+}
 
-                    p = p.substr(SlashIndex + 1, filename.length() + 1);
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+bool AnimMesh::initMaterials(const aiScene* scene, const std::string& file_name)
+{
+    bool ret;
 
+    for (unsigned int i = 0 ; i < scene->mNumMaterials ; i++)
+    {
+        const aiMaterial* material = scene->mMaterials[i];
 
-                 std::string FullPath = dir + "/" + p;
-std::cout << FullPath << std::endl;
-                m_Textures[i] = new Texture(GL_TEXTURE_2D, FullPath.c_str());
+        this->m_Textures[i] = NULL;
 
-                if (!m_Textures[i]->load()) {
-                    printf("Error loading texture '%s'\n", FullPath.c_str());
+        if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+        {
+            aiString path;
+            std::string dir = file_name.substr(0, file_name.find_last_of("/"));
+
+            if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+            {
+                std::string p(path.data);
+
+                std::string full_path = dir + "/" + p.substr(p.find_last_of("/") + 1, file_name.length() + 1);
+
+                m_Textures[i] = new Texture(GL_TEXTURE_2D, full_path.c_str());
+
+                if (!m_Textures[i]->load())
+                {
+                    printf("Error loading texture '%s'\n", full_path.c_str());
                     delete m_Textures[i];
                     m_Textures[i] = NULL;
-                    Ret = false;
+                    ret = false;
                 }
             }
         }
 
-        if (!m_Textures[i]) {
+        if (!m_Textures[i])
+        {
             m_Textures[i] = new Texture(GL_TEXTURE_2D, "./white.png");
-            Ret = m_Textures[i]->load();
+            ret = m_Textures[i]->load();
         }
     }
 
-    return Ret;
-
-    // Extract the directory part from the file name
-  /*  string::size_type SlashIndex = Filename.find_last_of("/");
-    string Dir;
-
-    if (SlashIndex == string::npos) {
-        Dir = ".";
-    }
-    else if (SlashIndex == 0) {
-        Dir = "/";
-    }
-    else {
-        Dir = Filename.substr(0, SlashIndex);
-    }
-
-    bool Ret = true;
-
-    // Initialize the materials
-    for (uint i = 0 ; i < pScene->mNumMaterials ; i++) {
-        const aiMaterial* pMaterial = pScene->mMaterials[i];
-
-        m_Textures[i] = NULL;
-
-        if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-            aiString Path;
-
-            if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                string p(Path.data);
-
-                if (p.substr(0, 2) == ".\\") {
-                    p = p.substr(2, p.size() - 2);
-                }
-
-                string FullPath = Dir + "/" + p;
-
-                m_Textures[i] = new Texture(GL_TEXTURE_2D, FullPath.c_str());
-
-                if (!m_Textures[i]->Load()) {
-                    printf("Error loading texture '%s'\n", FullPath.c_str());
-                    delete m_Textures[i];
-                    m_Textures[i] = NULL;
-                    Ret = false;
-                }
-                else {
-                    printf("%d - loaded texture '%s'\n", i, FullPath.c_str());
-                }
-            }
-        }
-    }*/
-
-    return Ret;
-    return true;
+    return ret;
 }
 
-void AnimMesh::loadBones(uint meshIndex, const aiMesh *pMesh, std::vector<AnimMesh::VertexBoneData> &bones)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+const aiNodeAnim *AnimMesh::findNodeAnim(const aiAnimation *animation, const std::string node_name)
 {
-    for (uint i = 0 ; i < pMesh->mNumBones ; i++) {
-        uint BoneIndex = 0;
-        std::string BoneName(pMesh->mBones[i]->mName.data);
+    for (GLuint i = 0 ; i < animation->mNumChannels ; i++)
+    {
+        const aiNodeAnim* node_anim = animation->mChannels[i];
 
-        if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-            BoneIndex = m_NumBones;
-            m_NumBones++;
-            BoneInfo bi;
-            m_BoneInfo.push_back(bi);
-            cloneMatrix4x4ToGLM(m_BoneInfo[BoneIndex].BoneOffset, pMesh->mBones[i]->mOffsetMatrix);
-            m_BoneMapping[BoneName] = BoneIndex;
-        }
-        else {
-            BoneIndex = m_BoneMapping[BoneName];
-        }
-
-        m_BoneMapping[BoneName] = BoneIndex;
-        cloneMatrix4x4ToGLM(m_BoneInfo[BoneIndex].BoneOffset, pMesh->mBones[i]->mOffsetMatrix);
-
-
-        for (uint j = 0 ; j < pMesh->mBones[i]->mNumWeights ; j++) {
-            uint VertexID = m_Entries[meshIndex].baseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
-            float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
-            bones[VertexID].addBoneData(BoneIndex, Weight);
-        }
-    }
-
-}
-
-const aiNodeAnim *AnimMesh::FindNodeAnim(const aiAnimation *pAnimation, const std::string NodeName)
-{
-    for (uint i = 0 ; i < pAnimation->mNumChannels ; i++) {
-        const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
-
-        if (std::string(pNodeAnim->mNodeName.data) == NodeName) {
-            return pNodeAnim;
-        }
+        if (std::string(node_anim->mNodeName.data) == node_name)
+            return node_anim;
     }
 
     return NULL;
 }
 
-uint AnimMesh::FindPosition(float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+GLuint AnimMesh::findPosition(float animation_time, const aiNodeAnim *node_anim)
 {
-    for (uint i = 0 ; i < pNodeAnim->mNumPositionKeys - 1 ; i++) {
-        if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+    for (GLuint i = 0 ; i < node_anim->mNumPositionKeys - 1 ; i++)
+    {
+        if (animation_time < (float)node_anim->mPositionKeys[i + 1].mTime)
             return i;
-        }
     }
-
-    assert(0);
 
     return 0;
 }
 
-uint AnimMesh::FindRotation(float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+GLuint AnimMesh::findRotation(float animation_time, const aiNodeAnim *node_anim)
 {
-    assert(pNodeAnim->mNumRotationKeys > 0);
-
-    for (uint i = 0 ; i < pNodeAnim->mNumRotationKeys - 1 ; i++) {
-        if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+    for (GLuint i = 0 ; i < node_anim->mNumRotationKeys - 1 ; i++)
+    {
+        if (animation_time < (float)node_anim->mRotationKeys[i + 1].mTime)
             return i;
-        }
     }
-
-    assert(0);
 
     return 0;
 }
 
-uint AnimMesh::FindScaling(float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+GLuint AnimMesh::findScaling(float animation_time, const aiNodeAnim *node_anim)
 {
-    assert(pNodeAnim->mNumScalingKeys > 0);
-
-    for (uint i = 0 ; i < pNodeAnim->mNumScalingKeys - 1 ; i++) {
-        if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+    for (GLuint i = 0 ; i < node_anim->mNumScalingKeys - 1 ; i++)
+    {
+        if (animation_time < (float)node_anim->mScalingKeys[i + 1].mTime)
             return i;
-        }
     }
-
-    assert(0);
 
     return 0;
 }
 
-void AnimMesh::CalcInterpolatedScaling(aiVector3D &Out, float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::calcInterpolatedScaling(aiVector3D &out, float animation_time, const aiNodeAnim *node_anim)
 {
-    if (pNodeAnim->mNumScalingKeys == 1) {
-        Out = pNodeAnim->mScalingKeys[0].mValue;
+    if (node_anim->mNumScalingKeys == 1)
+    {
+        out = node_anim->mScalingKeys[0].mValue;
         return;
     }
 
-    uint ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
-    uint NextScalingIndex = (ScalingIndex + 1);
-    assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
-    float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
-    float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+    GLuint scaling_index = this->findScaling(animation_time, node_anim);
+    GLuint next_scaling_index = (scaling_index + 1);
 
-    assert(Factor >= 0.0f && Factor <= 1.0f);
-    const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
-    const aiVector3D& End   = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
-    aiVector3D Delta = End - Start;
-    Out = Start + Factor * Delta;
+    float delta_time = (float)(node_anim->mScalingKeys[next_scaling_index].mTime - node_anim->mScalingKeys[scaling_index].mTime);
+    float factor = (animation_time - (float)node_anim->mScalingKeys[scaling_index].mTime) / delta_time;
+
+    const aiVector3D& start = node_anim->mScalingKeys[scaling_index].mValue;
+    const aiVector3D& end   = node_anim->mScalingKeys[next_scaling_index].mValue;
+
+    aiVector3D delta = end - start;
+    out = start + factor * delta;
 }
 
-void AnimMesh::CalcInterpolatedRotation(aiQuaternion &Out, float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::calcInterpolatedRotation(aiQuaternion &out, float animation_time, const aiNodeAnim *node_anim)
 {
     // we need at least two values to interpolate...
-    if (pNodeAnim->mNumRotationKeys == 1) {
-        Out = pNodeAnim->mRotationKeys[0].mValue;
+    if (node_anim->mNumRotationKeys == 1)
+    {
+        out = node_anim->mRotationKeys[0].mValue;
         return;
     }
 
-    uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
-    uint NextRotationIndex = (RotationIndex + 1);
-    assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
-    float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
-    float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    //assert(Factor >= 0.0f && Factor <= 1.0f);
-    const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
-    const aiQuaternion& EndRotationQ   = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
-    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
-    Out = Out.Normalize();
+    GLuint rotation_index = this->findRotation(animation_time, node_anim);
+    GLuint next_rotation_index = (rotation_index + 1);
+
+    float delta_time = (float)(node_anim->mRotationKeys[next_rotation_index].mTime - node_anim->mRotationKeys[rotation_index].mTime);
+    float factor = (animation_time - (float)node_anim->mRotationKeys[rotation_index].mTime) / delta_time;
+
+    const aiQuaternion& start_rotation = node_anim->mRotationKeys[rotation_index].mValue;
+    const aiQuaternion& end_otation    = node_anim->mRotationKeys[next_rotation_index].mValue;
+
+    aiQuaternion::Interpolate(out, start_rotation, end_otation, factor);
+    out = out.Normalize();
 }
 
-void AnimMesh::CalcInterpolatedPosition(aiVector3D &Out, float AnimationTime, const aiNodeAnim *pNodeAnim)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::calcInterpolatedPosition(aiVector3D &out, float animation_time, const aiNodeAnim *node_anim)
 {
-    if (pNodeAnim->mNumPositionKeys == 1) {
-        Out = pNodeAnim->mPositionKeys[0].mValue;
+    if (node_anim->mNumPositionKeys == 1)
+    {
+        out = node_anim->mPositionKeys[0].mValue;
         return;
     }
 
-    uint PositionIndex = FindPosition(AnimationTime, pNodeAnim);
-    uint NextPositionIndex = (PositionIndex + 1);
-    assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
-    float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
-    float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-    //  assert(Factor >= 0.0f && Factor <= 1.0f);
-    const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
-    const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
-    aiVector3D Delta = End - Start;
-    Out = Start + Factor * Delta;
+    GLuint position_index = this->findPosition(animation_time, node_anim);
+    GLuint next_position_index = (position_index + 1);
+
+
+    float delta_time = (float)(node_anim->mPositionKeys[next_position_index].mTime - node_anim->mPositionKeys[position_index].mTime);
+    float factor = (animation_time - (float)node_anim->mPositionKeys[position_index].mTime) / delta_time;
+
+    const aiVector3D& start = node_anim->mPositionKeys[position_index].mValue;
+    const aiVector3D& end   = node_anim->mPositionKeys[next_position_index].mValue;
+
+    aiVector3D delta = end - start;
+    out = start + factor * delta;
 }
 
-void AnimMesh::readNodeHierarchy(float AnimationTime, const aiNode *pNode, const glm::mat4 &ParentTransform)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::readNodeHierarchy(float animation_time, const aiNode *node, const glm::mat4 &parent_transform)
 {
-   std::string NodeName(pNode->mName.data);
-   const aiAnimation* pAnimation = m_pAnimation;
-   glm::mat4 NodeTransformation;
-   cloneMatrix4x4ToGLM(NodeTransformation, pNode->mTransformation);
-   //NodeTransformation = glm::inverse(NodeTransformation);
-   const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
-   if (pNodeAnim) {
+   std::string node_name(node->mName.data);
+   const aiAnimation* animation = this->m_Animation;
+   glm::mat4 node_transformation;
+
+   cloneMatrix4x4ToGLM(node_transformation, node->mTransformation);
+
+   const aiNodeAnim* node_anim = this->findNodeAnim(animation, node_name);
+
+   if (node_anim)
+   {
        // Interpolate scaling and generate scaling transformation matrix
-       aiVector3D Scaling;
-       CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
-       glm::mat4 ScalingM;
-       ScalingM[0][0] = Scaling.x;
-       ScalingM[1][1] = Scaling.y;
-       ScalingM[2][2] = Scaling.z;
-       ScalingM[3][3] = 1;
+       aiVector3D scaling;
+       this->calcInterpolatedScaling(scaling, animation_time, node_anim);
+       glm::mat4 scaling_m;
+       scaling_m[0][0] = scaling.x;
+       scaling_m[1][1] = scaling.y;
+       scaling_m[2][2] = scaling.z;
+       scaling_m[3][3] = 1;
 
        // Interpolate rotation and generate rotation transformation matrix
-       aiQuaternion RotationQ;
-       CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
-       glm::quat tmpQuat;
-       tmpQuat.w = RotationQ.w; tmpQuat.x = RotationQ.x; tmpQuat.y = RotationQ.y; tmpQuat.z = RotationQ.z;
-       tmpQuat = glm::inverse(tmpQuat);
-       glm::mat4 RotationM = glm::mat4_cast(tmpQuat);
+       aiQuaternion rotation;
+       this->calcInterpolatedRotation(rotation, animation_time, node_anim);
+       glm::quat tmp_quat;
+       tmp_quat.w = rotation.w;
+       tmp_quat.x = rotation.x;
+       tmp_quat.y = rotation.y;
+       tmp_quat.z = rotation.z;
+       tmp_quat = glm::inverse(tmp_quat);
+       glm::mat4 rotation_m = glm::mat4_cast(tmp_quat);
 
        // Interpolate translation and generate translation transformation matrix
-       aiVector3D Translation;
-       CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
-       glm::mat4 TranslationM;
-       TranslationM[0][0] = 1;
-       TranslationM[1][1] = 1;
-       TranslationM[2][2] = 1;
-       TranslationM[3][3] = 1;
-       TranslationM[0][3] = Translation.x;
-       TranslationM[1][3] = Translation.y;
-       TranslationM[2][3] = Translation.z;
+       aiVector3D translation;
+       this->calcInterpolatedPosition(translation, animation_time, node_anim);
+       glm::mat4 translation_m;
+       translation_m[0][0] = 1;
+       translation_m[1][1] = 1;
+       translation_m[2][2] = 1;
+       translation_m[3][3] = 1;
+       translation_m[0][3] = translation.x;
+       translation_m[1][3] = translation.y;
+       translation_m[2][3] = translation.z;
 
        // Combine the above transformations
-       glm::mat4 tmp;
-       tmp[0][0]= -1; tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 0;
-       tmp[0][0]= 0; tmp[1][1]= -1; tmp[0][0]= 0; tmp[0][0]= 0;
-       tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= -1; tmp[0][0]= 0;
-       tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 0; tmp[0][0]= 1;
-       NodeTransformation = RotationM * TranslationM;
+       node_transformation = rotation_m * translation_m;
    }
 
-   glm::mat4 GlobalTransformation =  NodeTransformation * ParentTransform;
-   if (m_BoneMapping.find(NodeName) != m_BoneMapping.end())
+   glm::mat4 global_transformation =  node_transformation * parent_transform;
+   if (m_BoneMapping.find(node_name) != m_BoneMapping.end())
    {
-       uint BoneIndex = m_BoneMapping[NodeName];
-       m_BoneInfo[BoneIndex].FinalTransformation =  m_BoneInfo[BoneIndex].BoneOffset * GlobalTransformation;
+       GLuint bone_index = m_BoneMapping[node_name];
+       m_BoneInfo[bone_index].m_FinalTransformation =  m_BoneInfo[bone_index].m_BoneOffset * global_transformation;
    }
-   for (uint i = 0 ; i < pNode->mNumChildren ; i++)
+
+   for (GLuint i = 0 ; i < node->mNumChildren ; i++)
    {
-       readNodeHierarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+       readNodeHierarchy(animation_time, node->mChildren[i], global_transformation);
    }
 }
 
-void
-AnimMesh::update(float tpf)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::update(float tpf)
 {
-    m_runningTime += tpf;
+    this->m_RunningTime += tpf;
 }
 
-void
-AnimMesh::render(const glm::mat4 &modelView, const glm::mat4 &projection)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::render(const glm::mat4 &model_view, const glm::mat4 &projection)
 {
+    if(this->m_IsLoading)
+        return;
+
     glBindVertexArray(m_VAO);
     glUseProgram(m_shader->getProgramID());
-        this->m_light->render(m_shader->getProgramID());
-        glUniformMatrix4fv(m_idModelView, 1, GL_FALSE, glm::value_ptr(modelView) );
-        glUniformMatrix4fv(m_idProjection, 1, GL_FALSE, glm::value_ptr(projection) );
+
+    this->m_Light->render(m_shader->getProgramID());
+
+    glUniformMatrix4fv(this->m_IdModelView, 1, GL_FALSE, glm::value_ptr(model_view));
+    glUniformMatrix4fv(this->m_IdProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint id_has_animation = glGetUniformLocation(m_shader->getProgramID(), "hasAnimation");
+
+    if (this->m_AnimationSelected)
+    {
+        glUniform1f(id_has_animation, 1.0f );
+
         std::vector<glm::mat4> transforms;
-        this->boneTransform(m_runningTime, transforms);
-        for(uint i = 0; i<transforms.size(); i++)
+        this->boneTransform(this->m_RunningTime, transforms);
+
+        for(GLuint i = 0; i<transforms.size(); i++)
         {
-            assert(i < MAX_BONES);
-            /*std::cout << "i="<<i<<std::endl;
-            std::cout << transforms[i][0][0] << " " << transforms[i][0][1] << " " << transforms[i][0][2] << " " << transforms[i][0][3] << std::endl;
-            std::cout << transforms[i][1][0] << " " << transforms[i][1][1] << " " << transforms[i][1][2] << " " << transforms[i][1][3] << std::endl;
-            std::cout << transforms[i][2][0] << " " << transforms[i][2][1] << " " << transforms[i][2][2] << " " << transforms[i][2][3] << std::endl;
-            std::cout << transforms[i][3][0] << " " << transforms[i][3][1] << " " << transforms[i][3][2] << " " << transforms[i][3][3] << std::endl;*/
-            glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(transforms[i]));
+            glUniformMatrix4fv(this->m_BoneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(transforms[i]));
+        }
+    }
+    else
+    {
+        glUniform1i(id_has_animation, 0.0f );
+    }
+
+    for (unsigned int i = 0 ; i < this->m_Entries.size() ; i++)
+    {
+        const GLuint material_index = this->m_Entries[i].m_MaterialIndex;
+
+        if (m_Textures[material_index])
+        {
+           m_Textures[material_index]->bind(GL_TEXTURE0);
         }
 
+        glDrawElementsBaseVertex(GL_TRIANGLES, m_Entries[i].m_NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * m_Entries[i].m_BaseIndex), m_Entries[i].m_BaseVertex);
+    }
 
-        for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-
-            const unsigned int MaterialIndex = m_Entries[i].materialIndex;
-            assert(MaterialIndex < m_Textures.size());
-            if (m_Textures[MaterialIndex]) {
-               m_Textures[MaterialIndex]->bind(GL_TEXTURE0);
-            }
-            glDrawElementsBaseVertex(GL_TRIANGLES,
-                                      m_Entries[i].numIndices,
-                                      GL_UNSIGNED_INT,
-                                      (void*)(sizeof(unsigned int) * m_Entries[i].baseIndex),
-                                      m_Entries[i].baseVertex);
-        }
-        // Make sure the VAO is not changed from the outside
-
-        glUseProgram(0);
-        glBindVertexArray(0);
+    glUseProgram(0);
+    glBindVertexArray(0);
 }
 
-void AnimMesh::boneTransform(float timeInSecond, std::vector<glm::mat4> &transforms)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void AnimMesh::boneTransform(float time_in_second, std::vector<glm::mat4> &transforms)
 {
-    glm::mat4 Identity;
-    Identity[0][0] = 1;/* Identity[0][1] = 0; Identity[0][2] = 0; Identity[0][3] = 0;
-    Identity[1][0] = 0;*/ Identity[1][1] = 1; /*Identity[1][2] = 0; Identity[1][3] = 0;
-    Identity[2][0] = 0; Identity[2][1] = 0; */Identity[2][2] = 1;/* Identity[2][3] = 0;
-    Identity[3][0] = 0; Identity[3][1] = 0; Identity[3][2] = 0; */Identity[3][3] = 1;
+    glm::mat4 identity;
+    identity[0][0] = 1;
+    identity[1][1] = 1;
+    identity[2][2] = 1;
+    identity[3][3] = 1;
 
-    float TicksPerSecond = (float)(m_pAnimation->mTicksPerSecond != 0 ? m_pAnimation->mTicksPerSecond : 25.0f);
-    float TimeInTicks = timeInSecond * TicksPerSecond;
-    float AnimationTime = fmod(TimeInTicks, (float)m_pAnimation->mDuration);
-    readNodeHierarchy(AnimationTime, m_pRootNode, Identity);
-    transforms.resize(m_NumBones);
-    for (uint i = 0 ; i < m_NumBones ; i++) {
-        transforms[i] = m_BoneInfo[i].FinalTransformation;// * Identity;
+    float ticks_per_second = (float)(this->m_Animation->mTicksPerSecond != 0 ? this->m_Animation->mTicksPerSecond : 25.0f);
+    float time_in_ticks = time_in_second * ticks_per_second;
+    float animation_time = fmod(time_in_ticks, (float)this->m_Animation->mDuration);
+
+    readNodeHierarchy(animation_time, this->m_RootNode, identity);
+    transforms.resize(this->m_NumBones);
+
+    for (GLuint i = 0 ; i < this->m_NumBones ; i++)
+    {
+        transforms[i] = this->m_BoneInfo[i].m_FinalTransformation;
     }
 }
 
-
-void AnimMesh::VertexBoneData::addBoneData(uint boneID, float weight)
+/**************************************************************************
+* Name: initMaterials
+* Description: initialize the textures of the mesh
+* Inputs:
+- parameter1: the current mesh index
+- parameter2: the mesh loaded from assimp
+- parameter3: the vector of positions
+- parameter4: the vector of normals
+- parameter5: the vector of textures
+- parameter6: the vector of bones
+- parameter6: the vector of indices
+* Returns:
+- value: void
+**************************************************************************/
+void VertexBoneData::addBoneData(GLuint bone_id, float weight)
 {
-    for (uint i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(IDs) ; i++) {
-        if (Weights[i] == 0.0) {
-            IDs[i] = boneID;
-            Weights[i] = weight;
+    for (GLuint i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(this->m_IDs) ; i++)
+    {
+        if(this->m_Weights[i] == 0.0)
+        {
+            this->m_IDs[i] = bone_id;
+            this->m_Weights[i] = weight;
             return;
         }
     }
-
-    // should never get here - more bones than we have space for
-    assert(0);
 }

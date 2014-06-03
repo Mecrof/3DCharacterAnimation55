@@ -69,4 +69,18 @@ void SceneWindow::update(float tpf)
     */
 }
 
+void
+SceneWindow::setModel(QString fileName)
+{
+    myMesh->loadMesh(fileName.toStdString());
+}
 
+void SceneWindow::runAnimation(int i)
+{
+    this->myMesh->runAnimation(i);
+}
+
+void SceneWindow::addAnimation(const std::string &file_name)
+{
+    this->myMesh->addAnimation(file_name);
+}

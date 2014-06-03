@@ -22,7 +22,8 @@ SOURCES += \
     scene/Camera.cpp \
     scene/AnimMesh.cpp \
     scene/TrackCamera.cpp \
-    scene/Texture.cpp
+    scene/Texture.cpp \
+    gui/GUIWindow.cpp
 
 HEADERS += \
     engine/Engine.hpp \
@@ -39,7 +40,8 @@ HEADERS += \
     scene/Camera.hpp \
     scene/AnimMesh.h \
     scene/TrackCamera.hpp \
-    scene/Texture.hpp
+    scene/Texture.hpp\
+    gui/GUIWindow.hpp
 
 OTHER_FILES += \
     Shaders/texture.vert \
