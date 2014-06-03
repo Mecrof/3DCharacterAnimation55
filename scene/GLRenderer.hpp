@@ -12,6 +12,7 @@
 // Project includes
 #include "scene/Node.hpp"
 #include "scene/Camera.hpp"
+#include "scene/TrackCamera.hpp"
 
 namespace scene
 {
@@ -51,6 +52,7 @@ namespace scene
 
         Node * m_rootNode;
         Camera * cam;
+        TrackCamera * trackCam;
 
     };
 }
