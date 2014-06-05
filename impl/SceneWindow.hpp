@@ -6,6 +6,7 @@
 #include "impl/Triangle.hpp"
 #include "scene/AnimMesh.h"
 #include <math.h>
+#include "scene/Light.hpp"
 
 class SceneWindow : public scene::GLRenderer
 {
@@ -20,6 +21,7 @@ public:
     void setModel(QString);
     void runAnimation(int i);
     void addAnimation(const std::string& file_name);
+    scene::SpotLight::Light* getLight();
 
     AnimMesh * myMesh;
     Triangle * triangle;

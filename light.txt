@@ -1,0 +1,12 @@
+SpotLight
+#light
+ambiant 1.0 1.0 1.0
+diffuse 0.8 0.8 0.8
+specular 0.0 0.0 0.0
+halfplane 1.0 1.0 1.0
+direction 1.0 1.0 1.0
+#material
+ambient 10.0 10.0 10.0
+diffuse 1.0 1.0 1.0
+specular 1.0 1.0 1.0
+shininess 1.0

@@ -84,3 +84,8 @@ void SceneWindow::addAnimation(const std::string &file_name)
 {
     this->myMesh->addAnimation(file_name);
 }
+
+scene::SpotLight::Light* SceneWindow::getLight()
+{
+    return this->myMesh->getLight();
+}

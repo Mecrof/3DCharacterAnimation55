@@ -35,7 +35,7 @@ void main() {
 
         pos = BoneTransform * vec4(in_Vertex,1.0);
         v_posVertex = vec3(modelview * pos);
-        v_ecNormal = normalize(vec3(modelview * BoneTransform * vec4(in_Normal, 0.0)));
+        v_ecNormal = normalize(vec3(BoneTransform * vec4(in_Normal, 0.0)));
     }
     else
     {

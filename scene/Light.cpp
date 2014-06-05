@@ -55,7 +55,7 @@ namespace SpotLight
 
     }
 
-    DirectionalLight* Light::getLight()
+    DirectionalLight* Light::getDirectionalLight()
     {
         return this->m_light;
     }

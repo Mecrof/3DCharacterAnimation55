@@ -855,6 +855,11 @@ void AnimMesh::render(const glm::mat4 &model_view, const glm::mat4 &projection)
     glBindVertexArray(0);
 }
 
+scene::SpotLight::Light* AnimMesh::getLight()
+{
+    return this->m_Light;
+}
+
 /**************************************************************************
 * Name: initMaterials
 * Description: initialize the textures of the mesh

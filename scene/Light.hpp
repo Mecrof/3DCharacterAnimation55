@@ -38,7 +38,7 @@ namespace scene
                 explicit Light();
                 explicit Light(DirectionalLight*, Material*);
                 ~Light();
-                DirectionalLight* getLight();
+                DirectionalLight* getDirectionalLight();
                 Material* getMaterial();
                 void render(GLuint);
         };

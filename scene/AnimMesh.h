@@ -101,6 +101,8 @@ class AnimMesh : public scene::SceneObject {
         bool runAnimation(int index);
         const std::vector<const aiAnimation *> getAnimations();
 
+        scene::SpotLight::Light* getLight();
+
     private:
         void clear();
 

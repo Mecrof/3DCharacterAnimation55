@@ -23,15 +23,24 @@ namespace gui {
             void selectModel();
             void loadModel(int i);
 
+            void selectLight();
+            void applyLight();
+
         private :
             QPushButton *m_LoadModelButton;
             QPushButton *m_SelectModelButton;
 
+            QPushButton *m_LoadLightButton;
+            QPushButton *m_ApplyLightButton;
+
             QLabel  *m_ModelPath;
+            QLabel  *m_LightPath;
 
             QComboBox *m_SelectAnimationBox;
 
             SceneWindow *m_OpenGLWindow;
+
+            std::string m_LightFilePath;
     };
 }
 
