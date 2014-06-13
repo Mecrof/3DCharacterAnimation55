@@ -2,30 +2,26 @@
 
 namespace scene
 {
-    /*
-    SceneObject::SceneObject(Node *parent)
-    {
-        if (parent != 0)
-        {
-            m_parent = parent;
-        }
-        else
-        {
-            m_parent = NULL;
-        }
-    }
-    //*/
-
-//*
+/////////////////////////////// PUBLIC ///////////////////////////////////////
+//============================= LIFECYCLE ====================================
     SceneObject::SceneObject()
     {
     }
-//*/
+
     SceneObject::~SceneObject()
     {
 
     }
-
+//============================= OPERATIONS ===================================
+    /**************************************************************************
+    * Name: render
+    * Description: render the object with the transformation given in the modelView
+    * matrix.
+    * Inputs:
+    - const glm::mat4 &modelView: matrix of the model and the view in the 3D world
+    - const glm::mat4 &projection: matrix of the projection in the 3D world
+    * Returns: void
+    **************************************************************************/
     void SceneObject::render(const glm::mat4 & modelView, const glm::mat4 & projection)
     {
 

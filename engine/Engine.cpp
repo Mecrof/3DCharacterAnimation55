@@ -2,6 +2,8 @@
 #include <iostream>
 namespace engine
 {
+/////////////////////////////// PUBLIC ///////////////////////////////////////
+//============================= LIFECYCLE ====================================
     Engine::Engine(int fps, scene::GLRenderer *renderer)
     {
         if ( fps == 0 )
@@ -37,6 +39,13 @@ namespace engine
         std::cout <<"Timer stopped"<<std::endl;
     }
 
+    //============================= OPERATIONS ===================================
+    /**************************************************************************
+    * Name: start
+    * Description: start the engine, the canvas renderere and the timer
+    * Inputs: void
+    * Returns: void
+    **************************************************************************/
     void Engine::start()
     {
         m_Timer->start(1000/m_Fps);//set clock rate
@@ -44,6 +53,12 @@ namespace engine
         m_Renderer->show();
     }
 
+    /**************************************************************************
+    * Name: clockEvent
+    * Description: called when a bip of the timer occures
+    * Inputs: void
+    * Returns: void
+    **************************************************************************/
     void Engine::clockEvent()
     {
         int tpf = m_Time.elapsed();
@@ -54,6 +69,12 @@ namespace engine
         m_Renderer->updateGL();
     }
 
+    /**************************************************************************
+    * Name: exitEvent
+    * Description: called when the GLRenderer is shutting down
+    * Inputs: void
+    * Returns: void
+    **************************************************************************/
     void Engine::exitEvent()
     {
         this->disconnect(m_Renderer, SIGNAL(closing()), this, SLOT(clockEvent()));

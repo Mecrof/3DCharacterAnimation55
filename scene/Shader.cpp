@@ -2,6 +2,9 @@
 
 namespace scene
 {
+/////////////////////////////// PUBLIC ///////////////////////////////////////
+//============================= LIFECYCLE ====================================
+
     Shader::Shader() : m_VertexID(0), m_FragmentID(0), m_ProgramID(0), m_SrcVertexShader(), m_SrcFragmentShader()
     {
     }
@@ -25,7 +28,14 @@ namespace scene
         glDeleteShader(m_FragmentID);
         glDeleteProgram(m_ProgramID);
     }
+//============================= OPERATIONS ===================================
 
+    /**************************************************************************
+    * Name: bind
+    * Description: (re)load the shader
+    * Inputs: void
+    * Returns: void
+    **************************************************************************/
     bool Shader::bind()
     {
         if(glIsShader(m_VertexID) == GL_TRUE)
@@ -79,7 +89,15 @@ namespace scene
         }
     }
 
-
+    /**************************************************************************
+    * Name: compile
+    * Description: compile the sharder
+    * Inputs:
+    - GLuint &shader: the shader program id
+    - GLenum &type: the shader type to compile (Fragment Shader & Vertex Shader)
+    - glm::mat4 projection: matrix of the projection in the 3D world
+    * Returns: void
+    **************************************************************************/
     bool Shader::compile(GLuint &shader, GLenum type, std::string const &srcFile)
     {
         //create shader
@@ -132,7 +150,7 @@ namespace scene
             return true;
         }
     }
-
+//============================= ATTRIBUTE ACCESSORS ==========================
 
     GLuint Shader::getProgramID() const
     {
