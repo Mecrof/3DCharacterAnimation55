@@ -1,0 +1,166 @@
+@startuml
+skinparam classAttributeIconSize 0 
+skinparam class {
+	BackgroundColor White
+	ArrowColor Black
+	BorderColor Black
+}
+
+QObject <|-- Engine
+class QObject
+
+Engine "1 m_Renderer" *-- GLRenderer
+class Engine {
+ - QTimer * m_Timer
+ - QTime m_Time
+ - GLRenderer * m_Renderer
+ - int m_Fps
+ # void clockEvent()
+ # void exitEvent()
+ + void start()
+}
+
+GLRenderer <|-- SceneWindow
+GLRenderer "1 m_RootNode" *-- Node
+GLRenderer "1 m_Cam" *-- Camera
+abstract class GLRenderer {
+ - mat4 m_ModelView
+ - mat4 m_Projection
+ - Node m_RootNode
+ - Camera m_Cam
+ - ... ...
+ + void initialize() = 0
+ + void update(float tpf) = 0
+ - void paintGL()
+ + ... ...()
+}
+
+SceneWindow "1" *-- AnimMesh
+class SceneWindow {
+ + AnimMesh * m_MyMesh
+ + ... ...
+ + void setModel(QString fileName)
+ + void runAnimation(int i)
+ + void addAnimation(const string &file_name)
+ + ... ...()
+}
+
+class Camera {
+ - float m_Phi
+ - float m_Theta
+ - vec3 m_Orientation
+ - vec3 m_Vecticalaxis
+ - vec3 m_SideMove
+ - vec3 m_Position
+ - vec3 m_Target
+ - float m_Sensivity
+ + void orientation(int xRel, int yRel, float sensivity)
+ + void move(QEvent *event)
+ + void lookat(mat4 &modelview)
+ + void setTarget(vec3 pointCible)
+ + void setPosition(vec3 position)
+ + void setSensivity(float sensivity)
+}
+
+Spatial <|-- Node
+class Spatial {
+ # vec3 m_Position
+ # quat m_Rotation
+ # vec3 m_Scale
+ + vec3 *translate(vec3 vector)
+ + vec3 *translate(float x, float y, float z)
+ + quat *rotate(float angle, vec3 axis)
+ + quat *rotate(quat rotation)
+ + vec3 *scale(vec3 factors)
+ + vec3 *scale(float x, float y, float z)
+ + vec3 &getPosition()
+ + void setPosition(vec3 position)
+ + void setPosition(float x, float y, float z)
+ + quat &getRotation()
+ + void setRotation(quat rotation)
+ + void setRotation(float angle, vec3 axis)
+ + vec3 &getScale()
+ + void setScale(vec3 scale)
+ + void setScale(float x, float y, float z)
+}
+
+Node --o "1 parent" Node
+Node "0..n children" *-- Node
+Node "1" *-- SceneObject
+class Node {
+ - Node m_Parent
+ - List<Node*> * m_Children
+ - SceneObject * m_Object
+ - ... ...
+ + void render(mat4 modelView, mat4 projection)
+ + ... ...()
+}
+
+SceneObject o-- Shader
+SceneObject <|-- AnimMesh
+abstract class SceneObject {
+ # Shader * m_Shader
+ - ... ...
+ + void update(float tpf) = 0
+ + void render(const mat4 &modelView, const mat4 &projection) = 0
+ + ... ...()
+}
+
+AnimMesh "1 m_Light" o-- Light
+AnimMesh "0..n" *-- Texture
+class AnimMesh {
+ - Light *m_Light
+ - vector<MeshEntry> m_Entries
+ - vector<BoneInfo> m_BoneInfo
+ - vector<Texture*> m_Textures
+ - vector<const aiAnimation*> m_Animations
+ - bool m_AnimationSelected
+ - GLuint m_NumBones
+ - ... ...
+ + bool loadMesh(const string &file_name)
+ + string addAnimation(const string & file_name)
+ + bool runAnimation(int index)
+ + const vector<const aiAnimation*> getAnimations()
+ + ... ...()
+}
+note right
+contains private function
+for loading meshs,
+bones and animations
+end note
+
+class Light {
+ - DirectionalLight *m_Light
+ - Material *m_Material
+ + DirectionalLight *getDirectionalLight()
+ + Material *getMaterial()
+ + void render(GLuint shaderId)
+}
+
+class Texture {
+ - const char* m_FileName
+ - GLenum m_TextureTarget
+ - GLuint m_TextureObj
+ - QPixmap* m_pImage
+ + bool load()
+ + void bind(GLenum textureUnit)
+}
+
+class Shader {
+ - GLuint m_VertexID
+ - GLuint m_FramentID
+ - GLuint m_ProgramID
+ - string m_SrcVertexShader
+ - string m_SrcFragmentShader
+ + bool bind()
+ + bool compile(GLuint &shader,
+ type, string const &srcFile);
+ + GLuint getProgramID() const
+}
+note right
+basic shader
+end note
+
+
+
+@enduml
