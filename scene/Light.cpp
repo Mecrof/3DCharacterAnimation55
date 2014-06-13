@@ -55,16 +55,39 @@ namespace SpotLight
 
     }
 
+    //============================= ACCESSORS ===================================
+    /**************************************************************************
+    * Name: getDirectionalLight
+    * Description: return the light
+    * Inputs: void
+    * Returns:
+    - value: the light
+    **************************************************************************/
     DirectionalLight* Light::getDirectionalLight()
     {
         return this->m_Light;
     }
 
+    /**************************************************************************
+    * Name: getMaterial
+    * Description: return the material
+    * Inputs: void
+    * Returns:
+    - value: the material
+    **************************************************************************/
     Material* Light::getMaterial()
     {
         return this->m_Material;
     }
 
+    //============================= OPERATIONS ===================================
+    /**************************************************************************
+    * Name: render
+    * Description: render the light
+    * Inputs: the id of the shader used
+    * Returns:
+    - value: void
+    **************************************************************************/
     void Light::render(GLuint shaderId)
     {
         GLint lightId1 = glGetUniformLocation(shaderId, "u_directionalLight.ambientColor");

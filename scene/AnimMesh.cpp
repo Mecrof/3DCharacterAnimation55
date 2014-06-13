@@ -165,11 +165,11 @@ bool AnimMesh::loadMesh(const std::string& file_name)
 
 /**************************************************************************
 * Name: addAnimation
-* Description: initialize the data from the scene
+* Description: Add an animation to the animation table
 * Inputs:
-- parameter1: a pointer to the current scene
+- parameter1: the path to the file containing the animation
 * Returns:
-- value:
+- value: the name of the animation added
 **************************************************************************/
 std::string AnimMesh::addAnimation(const std::string &file_name)
 {
@@ -195,11 +195,11 @@ std::string AnimMesh::addAnimation(const std::string &file_name)
 
 /**************************************************************************
 * Name: runAnimation
-* Description: initialize the data from the scene
+* Description: select the animation to run
 * Inputs:
 - parameter1: a pointer to the current scene
 * Returns:
-- value:
+- value: true if the animation has been selected
 **************************************************************************/
 bool AnimMesh::runAnimation(int index)
 {
@@ -217,16 +217,10 @@ bool AnimMesh::runAnimation(int index)
 
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: update
+* Description: update the mesh
 * Inputs:
 - parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
 * Returns:
 - value: void
 **************************************************************************/
@@ -236,16 +230,11 @@ void AnimMesh::update(float tpf)
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: boneTransform
+* Description: transform the bones
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the curren time
+- parameter2: the transform matrix to apply
 * Returns:
 - value: void
 **************************************************************************/
@@ -271,16 +260,11 @@ void AnimMesh::boneTransform(float time_in_second, std::vector<glm::mat4> &trans
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: render
+* Description: render the mesh
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the model/view matrix
+- parameter2: the projection matrix
 * Returns:
 - value: void
 **************************************************************************/
@@ -332,19 +316,27 @@ void AnimMesh::render(const glm::mat4 &model_view, const glm::mat4 &projection)
     glBindVertexArray(0);
 }
 
+
+//============================= ATTRIBUTE ACCESSORS ==========================
+
+/**************************************************************************
+* Name: getLight
+* Description: return the current light applied to the mesh
+* Inputs: void
+* Returns:
+- value: the current light
+**************************************************************************/
 scene::SpotLight::Light* AnimMesh::getLight()
 {
     return this->m_Light;
 }
-
-//============================= ATTRIBUTE ACCESSORS ==========================
 
 /**************************************************************************
 * Name: getAnimations
 * Description: return the available animations
 * Inputs: void
 * Returns:
-- std::vector<const aiAnimation*>: the available animations
+- value: the available animations
 **************************************************************************/
 const std::vector<const aiAnimation*> AnimMesh::getAnimations()
 {
@@ -566,13 +558,8 @@ void AnimMesh::loadBones(GLuint mesh_index, const aiMesh *ai_mesh, std::vector<V
 * Name: initMaterials
 * Description: initialize the textures of the mesh
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the current scene
+- parameter2: the path of the texture
 * Returns:
 - value: void
 **************************************************************************/
@@ -620,18 +607,13 @@ bool AnimMesh::initMaterials(const aiScene* scene, const std::string& file_name)
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: findNodeAnim
+* Description: find the node corresponding to the name
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the current animation
+- parameter2: the name of the node
 * Returns:
-- value: void
+- value: the node
 **************************************************************************/
 const aiNodeAnim *AnimMesh::findNodeAnim(const aiAnimation *animation, const std::string node_name)
 {
@@ -647,18 +629,13 @@ const aiNodeAnim *AnimMesh::findNodeAnim(const aiAnimation *animation, const std
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: findPosition
+* Description: find the position of the node
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the current time of the anim
+- parameter2: the node anim
 * Returns:
-- value: void
+- value: the index of the position of the node
 **************************************************************************/
 GLuint AnimMesh::findPosition(float animation_time, const aiNodeAnim *node_anim)
 {
@@ -672,18 +649,13 @@ GLuint AnimMesh::findPosition(float animation_time, const aiNodeAnim *node_anim)
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: findRotation
+* Description: find the rotation of the node
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the current time of the anim
+- parameter2: the node anim
 * Returns:
-- value: void
+- value: the index of the rotation of the node
 **************************************************************************/
 GLuint AnimMesh::findRotation(float animation_time, const aiNodeAnim *node_anim)
 {
@@ -697,18 +669,13 @@ GLuint AnimMesh::findRotation(float animation_time, const aiNodeAnim *node_anim)
 }
 
 /**************************************************************************
-* Name: initMaterials
+* Name: findScaling
 * Description: initialize the textures of the mesh
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the current time of the anim
+- parameter2: the node anim
 * Returns:
-- value: void
+- value: the index of the scaling of the node
 **************************************************************************/
 GLuint AnimMesh::findScaling(float animation_time, const aiNodeAnim *node_anim)
 {
@@ -722,16 +689,12 @@ GLuint AnimMesh::findScaling(float animation_time, const aiNodeAnim *node_anim)
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: calcInterpolatedScaling
+* Description: interpolate the scaling of the animation
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the vector of the scaling
+- parameter2: the time of the animation
+- parameter3: the node
 * Returns:
 - value: void
 **************************************************************************/
@@ -757,16 +720,12 @@ void AnimMesh::calcInterpolatedScaling(aiVector3D &out, float animation_time, co
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: calcInterpolatedScaling
+* Description: interpolate the scaling of the animation
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the vector of the scaling
+- parameter2: the time of the animation
+- parameter3: the node
 * Returns:
 - value: void
 **************************************************************************/
@@ -793,16 +752,12 @@ void AnimMesh::calcInterpolatedRotation(aiQuaternion &out, float animation_time,
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: calcInterpolatedScaling
+* Description: interpolate the scaling of the animation
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the vector of the scaling
+- parameter2: the time of the animation
+- parameter3: the node
 * Returns:
 - value: void
 **************************************************************************/
@@ -829,16 +784,12 @@ void AnimMesh::calcInterpolatedPosition(aiVector3D &out, float animation_time, c
 }
 
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: readNodeHierarchy
+* Description: apply the interpolation to the node
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the time of the animation
+- parameter2: the node
+- parameter3: the parent transformation matrix
 * Returns:
 - value: void
 **************************************************************************/
@@ -904,19 +855,12 @@ void AnimMesh::readNodeHierarchy(float animation_time, const aiNode *node, const
 }
 
 
-
-
 /**************************************************************************
-* Name: initMaterials
-* Description: initialize the textures of the mesh
+* Name: addBoneData
+* Description: add a bone data to the bone structure
 * Inputs:
-- parameter1: the current mesh index
-- parameter2: the mesh loaded from assimp
-- parameter3: the vector of positions
-- parameter4: the vector of normals
-- parameter5: the vector of textures
-- parameter6: the vector of bones
-- parameter6: the vector of indices
+- parameter1: the id of the bone
+- parameter2: the weight of the bone
 * Returns:
 - value: void
 **************************************************************************/

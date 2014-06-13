@@ -8,6 +8,14 @@ Texture::Texture(GLenum textureTarget, const char* fileName)
     m_pImage        = NULL;
 }
 
+//============================= OPERATIONS ===================================
+/**************************************************************************
+* Name: load
+* Description: load the texture
+* Inputs: void
+* Returns:
+- value: true if the texture has been loaded
+**************************************************************************/
 bool Texture::load()
 {
     m_pImage = new QPixmap(m_FileName);
@@ -21,6 +29,13 @@ bool Texture::load()
     return true;
 }
 
+/**************************************************************************
+* Name: bind
+* Description: bind the Texture
+* Inputs: void
+* Returns:
+- value: void
+**************************************************************************/
 void Texture::bind(GLenum textureUnit)
 {
     glActiveTexture(textureUnit);
