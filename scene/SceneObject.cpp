@@ -29,20 +29,20 @@ namespace scene
     void SceneObject::render(const glm::mat4 & modelView, const glm::mat4 & projection)
     {
 
-        glUseProgram(m_shader->getProgramID());
+        glUseProgram(m_Shader->getProgramID());
 
-            GLint idVertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
-            GLint idColor = glGetAttribLocation(m_shader->getProgramID(), "in_Color");
+            GLint idVertex = glGetAttribLocation(m_Shader->getProgramID(), "in_Vertex");
+            GLint idColor = glGetAttribLocation(m_Shader->getProgramID(), "in_Color");
 
-            glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, 0, m_vertices);
+            glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, 0, m_Vertices);
             glEnableVertexAttribArray(idVertex);
 
-            glVertexAttribPointer(idColor, 3, GL_FLOAT, GL_FALSE, 0, m_colors);
+            glVertexAttribPointer(idColor, 3, GL_FLOAT, GL_FALSE, 0, m_Colors);
             glEnableVertexAttribArray(idColor);
 
-            GLint idModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
+            GLint idModelView = glGetUniformLocation(m_Shader->getProgramID(), "modelview");
             glUniformMatrix4fv(idModelView, 1, GL_FALSE, glm::value_ptr(modelView) );
-            GLint idProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
+            GLint idProjection = glGetUniformLocation(m_Shader->getProgramID(), "projection");
             glUniformMatrix4fv(idProjection, 1, GL_FALSE, glm::value_ptr(projection) );
 
             glDrawArrays(GL_TRIANGLES, 0, 3);

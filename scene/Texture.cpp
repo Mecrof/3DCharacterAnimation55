@@ -3,20 +3,20 @@
 
 Texture::Texture(GLenum textureTarget, const char* fileName)
 {
-    m_textureTarget = textureTarget;
-    m_fileName      = fileName;
+    m_TextureTarget = textureTarget;
+    m_FileName      = fileName;
     m_pImage        = NULL;
 }
 
 bool Texture::load()
 {
-    m_pImage = new QPixmap(m_fileName);
+    m_pImage = new QPixmap(m_FileName);
 
-    glGenTextures(1, &m_textureObj);
-    glBindTexture(m_textureTarget, m_textureObj);
-    glTexImage2D(m_textureTarget, 0, GL_RGBA, m_pImage->width(), m_pImage->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, m_pImage->toImage().bits());
-    glTexParameterf(m_textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(m_textureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glGenTextures(1, &m_TextureObj);
+    glBindTexture(m_TextureTarget, m_TextureObj);
+    glTexImage2D(m_TextureTarget, 0, GL_RGBA, m_pImage->width(), m_pImage->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, m_pImage->toImage().bits());
+    glTexParameterf(m_TextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(m_TextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     return true;
 }
@@ -24,5 +24,5 @@ bool Texture::load()
 void Texture::bind(GLenum textureUnit)
 {
     glActiveTexture(textureUnit);
-    glBindTexture(m_textureTarget, m_textureObj);
+    glBindTexture(m_TextureTarget, m_TextureObj);
 }

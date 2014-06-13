@@ -32,11 +32,11 @@ namespace scene {
         char* getName();
 
     private:
-        Node * m_parent;
-        QLinkedList<Node*> *m_children;
-        SceneObject * m_object;
+        Node * m_Parent;
+        QLinkedList<Node*> *m_Children;
+        SceneObject * m_Object;
 
-        char* m_name;
+        char* m_Name;
 
     };
 }

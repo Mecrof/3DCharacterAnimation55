@@ -31,8 +31,8 @@ namespace scene
         class Light
         {
             private :
-                DirectionalLight *m_light;
-                Material *m_material;
+                DirectionalLight *m_Light;
+                Material *m_Material;
 
             public :
                 explicit Light();

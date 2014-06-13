@@ -25,9 +25,9 @@ namespace scene
 
     protected:
         //Node * m_parent;
-        float * m_vertices;
-        float * m_colors;
-        Shader * m_shader;
+        float * m_Vertices;
+        float * m_Colors;
+        Shader * m_Shader;
     };
 }
 

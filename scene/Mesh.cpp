@@ -4,14 +4,14 @@
 
 namespace scene
 {
-    Mesh::Mesh(const char * sourceFileName) : m_sourceFileName(sourceFileName)
+    Mesh::Mesh(const char * sourceFileName) : m_SourceFileName(sourceFileName)
     {
-        this->m_light = new SpotLight::Light;
+        this->m_Light = new SpotLight::Light;
 
-        this->m_shader = new scene::Shader("./Shaders/light.vert", "./Shaders/light.frag");
-        this->m_shader->bind();
+        this->m_Shader = new scene::Shader("./Shaders/light.vert", "./Shaders/light.frag");
+        this->m_Shader->bind();
 
-        this->initialized = false;
+        this->m_Initialized = false;
     }
 
     Mesh::~Mesh()
@@ -22,7 +22,7 @@ namespace scene
     void
     Mesh::init()
     {
-        if(this->initialized)
+        if(this->m_Initialized)
             return;
 
         Loader loader;
@@ -31,32 +31,32 @@ namespace scene
         bool res;
         glm::vec3 tmp;
 
-        res = loader.loadObj(this->m_sourceFileName, vertices, normals, facesVertices, facesNormals);
+        res = loader.loadObj(this->m_SourceFileName, vertices, normals, facesVertices, facesNormals);
 
         if(!res)
             return;
 
-        this->m_numFaces = facesVertices.size();
-        this->m_vertices = new float[facesVertices.size() * 3];
-        this->m_normals = new float[facesNormals.size() * 3];
+        this->m_NumFaces = facesVertices.size();
+        this->m_Vertices = new float[facesVertices.size() * 3];
+        this->m_Normals = new float[facesNormals.size() * 3];
 
         for(int i=0, j=-1; i<facesVertices.size(); ++i)
         {
             tmp = vertices.at(facesVertices.at(i));
-            this->m_vertices[++j] = tmp.x;
-            this->m_vertices[++j] = tmp.y;
-            this->m_vertices[++j] = tmp.z;
+            this->m_Vertices[++j] = tmp.x;
+            this->m_Vertices[++j] = tmp.y;
+            this->m_Vertices[++j] = tmp.z;
         }
 
         for(int i=0, j=-1; i<facesNormals.size(); ++i)
         {
             tmp = normals.at(facesNormals.at(i));
-            this->m_normals[++j] = tmp.x;
-            this->m_normals[++j] = tmp.y;
-            this->m_normals[++j] = tmp.z;
+            this->m_Normals[++j] = tmp.x;
+            this->m_Normals[++j] = tmp.y;
+            this->m_Normals[++j] = tmp.z;
         }
 
-        this->initialized = true;
+        this->m_Initialized = true;
     }
 
     void
@@ -68,25 +68,25 @@ namespace scene
     void
     Mesh::render(glm::mat4 modelView, glm::mat4 projection)
     {
-        glUseProgram(m_shader->getProgramID());
+        glUseProgram(m_Shader->getProgramID());
 
-            this->m_light->render(m_shader->getProgramID());
+            this->m_Light->render(m_Shader->getProgramID());
 
-            GLint idVertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
-            GLint idNormal = glGetAttribLocation(m_shader->getProgramID(), "in_Normal");
+            GLint idVertex = glGetAttribLocation(m_Shader->getProgramID(), "in_Vertex");
+            GLint idNormal = glGetAttribLocation(m_Shader->getProgramID(), "in_Normal");
 
             glEnableVertexAttribArray(idVertex);
-            glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, 0, m_vertices);
+            glVertexAttribPointer(idVertex, 3, GL_FLOAT, GL_FALSE, 0, m_Vertices);
 
             glEnableVertexAttribArray(idNormal);
-            glVertexAttribPointer(idNormal, 3, GL_FLOAT, GL_FALSE, 0, m_normals);
+            glVertexAttribPointer(idNormal, 3, GL_FLOAT, GL_FALSE, 0, m_Normals);
 
-            GLint idModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
+            GLint idModelView = glGetUniformLocation(m_Shader->getProgramID(), "modelview");
             glUniformMatrix4fv(idModelView, 1, GL_FALSE, glm::value_ptr(modelView) );
-            GLint idProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
+            GLint idProjection = glGetUniformLocation(m_Shader->getProgramID(), "projection");
             glUniformMatrix4fv(idProjection, 1, GL_FALSE, glm::value_ptr(projection) );
 
-            glDrawArrays(GL_TRIANGLES, 0, this->m_numFaces);
+            glDrawArrays(GL_TRIANGLES, 0, this->m_NumFaces);
 
             glDisableVertexAttribArray(idVertex);
             glDisableVertexAttribArray(idNormal);
@@ -96,6 +96,6 @@ namespace scene
 
     Shader &Mesh::getShader()
     {
-        return (*this->m_shader);
+        return (*this->m_Shader);
     }
 }

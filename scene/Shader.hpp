@@ -26,12 +26,12 @@ namespace scene
 
     private:
 
-        GLuint m_vertexID;
-        GLuint m_fragmentID;
-        GLuint m_programID;
+        GLuint m_VertexID;
+        GLuint m_FragmentID;
+        GLuint m_ProgramID;
 
-        std::string m_srcVertexShader;
-        std::string m_srcFragmentShader;
+        std::string m_SrcVertexShader;
+        std::string m_SrcFragmentShader;
     };
 }
 

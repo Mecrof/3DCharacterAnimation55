@@ -18,11 +18,11 @@ namespace scene
         Shader &getShader();
 
     private:
-        const char* m_sourceFileName;
-        bool initialized;
-        SpotLight::Light *m_light;
-        unsigned int m_numFaces;
-        float * m_normals;
+        const char* m_SourceFileName;
+        bool m_Initialized;
+        SpotLight::Light *m_Light;
+        unsigned int m_NumFaces;
+        float * m_Normals;
     };
 
 }

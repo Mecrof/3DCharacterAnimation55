@@ -23,10 +23,10 @@ namespace engine
         virtual void exitEvent();
 
     private:
-        QTimer * m_timer;
-        QTime m_time;
-        scene::GLRenderer * m_renderer;
-        int m_fps;
+        QTimer * m_Timer;
+        QTime m_Time;
+        scene::GLRenderer * m_Renderer;
+        int m_Fps;
     };
 }
 

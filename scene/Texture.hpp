@@ -15,9 +15,9 @@ class Texture
         void bind(GLenum textureUnit);
 
     private:
-        const char* m_fileName;
-        GLenum m_textureTarget;
-        GLuint m_textureObj;
+        const char* m_FileName;
+        GLenum m_TextureTarget;
+        GLuint m_TextureObj;
         QPixmap* m_pImage;
 };
 

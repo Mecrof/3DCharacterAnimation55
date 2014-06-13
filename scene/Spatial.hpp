@@ -34,9 +34,9 @@ namespace scene
         void setScale(float x, float y, float z);
 
     protected:
-        glm::vec3 m_position;
-        glm::quat m_rotation;
-        glm::vec3 m_scale;
+        glm::vec3 m_Position;
+        glm::quat m_Rotation;
+        glm::vec3 m_Scale;
 
 
     };

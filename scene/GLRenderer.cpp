@@ -11,14 +11,13 @@ namespace scene
 
         this->resize(width, height);
 
-        m_rootNode = new Node();
-        m_rootNode->setName("Root Node");
+        m_RootNode = new Node();
+        m_RootNode->setName("Root Node");
     }
 
     GLRenderer::~GLRenderer()
     {
-        std::cout << "GLRenderer stopping" << std::endl;
-        delete m_rootNode;
+        delete m_RootNode;
         std::cout << "GLRenderer stopped" << std::endl;
     }
 
@@ -32,7 +31,7 @@ namespace scene
         }
         if(Qt::Key_Up || Qt::Key_Down || Qt::Key_Left || Qt::Key_Right )
                 {
-                    cam->move(e);
+                    m_Cam->move(e);
                 }
     }
 
@@ -43,8 +42,8 @@ namespace scene
                 QMouseEvent *Mouse = static_cast<QMouseEvent*>(event);
                 int xRel;
                 int yRel;
-                xRel = Mouse->x() - Mousex;
-                yRel = Mouse->y() - Mousey;
+                xRel = Mouse->x() - m_Mousex;
+                yRel = Mouse->y() - m_Mousey;
                 int xRelAbs = sqrt(xRel*xRel);
                 int yRelAbs = sqrt(yRel*yRel);
                 if(xRelAbs > 10 || yRelAbs > 10)
@@ -52,17 +51,16 @@ namespace scene
                     xRel = 0;
                     yRel = 0;
                 }
-                cam->orientation(xRel,yRel,0.5);
+                m_Cam->orientation(xRel,yRel,0.5);
                 //trackCam->OnMouseMotion(xRel,yRel);
-                std::cout << "Coordonnees : " << xRel << " " << yRel << std::endl;
-                Mousex = Mouse->x();
-                Mousey = Mouse->y();
+                m_Mousex = Mouse->x();
+                m_Mousey = Mouse->y();
             }
         }
 
     Node &GLRenderer::getRootNode()
     {
-        return (*m_rootNode);
+        return (*m_RootNode);
     }
 
     void GLRenderer::initializeGL()
@@ -76,25 +74,25 @@ namespace scene
             Q_ASSERT(init_GLEW != GLEW_OK);
         }
         //#endif
-        cam = new Camera(glm::vec3(3.0,2.149,2.617), glm::vec3(0,0,0), glm::vec3(0,1,0));
+        m_Cam = new Camera(glm::vec3(3.0,2.149,2.617), glm::vec3(0,0,0), glm::vec3(0,1,0));
        // trackCam = new TrackCamera();
-        m_modelView = glm::mat4(1.0);
+        m_ModelView = glm::mat4(1.0);
         this->initialize();
     }
 
     void GLRenderer::resizeGL(int w, int h)
     {
         glViewport(0,0,w,h);
-        m_projection = glm::perspective(70.0, w/static_cast<double>(h), 1.0, 100.0);
+        m_Projection = glm::perspective(70.0, w/static_cast<double>(h), 1.0, 100.0);
     }
 
     void GLRenderer::paintGL()
     {
-        cam->lookat(m_modelView);
+        m_Cam->lookat(m_ModelView);
         //trackCam->look(m_modelView);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable( GL_DEPTH_TEST );
-        m_rootNode->render(m_modelView, m_projection);
+        m_RootNode->render(m_ModelView, m_Projection);
     }
 
     void GLRenderer::closeEvent(QCloseEvent * e)

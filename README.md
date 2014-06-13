@@ -12,4 +12,4 @@ dependencies :
 
 Actual preview :
 
-![Alt text](./Preview.png?raw=true "Preview : Ninja")
+![Alt text](./Preview.png?raw=true "Preview : Mr Bibandom")

@@ -6,23 +6,23 @@ namespace scene
 {
     Node::Node():Spatial()
     {
-        m_parent = NULL;
-        m_children = new QLinkedList<Node*>;
-        m_object = NULL;
+        m_Parent = NULL;
+        m_Children = new QLinkedList<Node*>;
+        m_Object = NULL;
     }
 
     Node::~Node()
     {
-        if (!m_children->isEmpty())
+        if (!m_Children->isEmpty())
         {
-            for(QLinkedList<Node*>::iterator it = m_children->begin();
-                it != m_children->end();
+            for(QLinkedList<Node*>::iterator it = m_Children->begin();
+                it != m_Children->end();
                 ++it)
             {
                 delete (*it);
             }
         }
-        delete m_children;
+        delete m_Children;
     }
 
     void Node::render(glm::mat4 modelView, glm::mat4 projection)
@@ -30,16 +30,16 @@ namespace scene
         QLinkedList<Node*>::iterator it;
         Node * child;
 
-        modelView = glm::translate(modelView, m_position);
-        modelView *= glm::toMat4(m_rotation);
-        modelView = glm::scale(modelView, m_scale);
+        modelView = glm::translate(modelView, m_Position);
+        modelView *= glm::toMat4(m_Rotation);
+        modelView = glm::scale(modelView, m_Scale);
         if (this->hasObject())
         {
-            m_object->render(modelView, projection);
+            m_Object->render(modelView, projection);
         }
-        if (!m_children->isEmpty())
+        if (!m_Children->isEmpty())
         {
-            for (it = m_children->begin(); it != m_children->end(); ++it)
+            for (it = m_Children->begin(); it != m_Children->end(); ++it)
             {
                 child = (*it);
                 child->render(modelView, projection);
@@ -49,48 +49,48 @@ namespace scene
 
     SceneObject &Node::getObject()
     {
-        return (*m_object);
+        return (*m_Object);
     }
 
     SceneObject *Node::setObject(SceneObject *object)
     {
-        SceneObject * old = m_object;
-        m_object = object;
+        SceneObject * old = m_Object;
+        m_Object = object;
         return old;
     }
 
     Node *Node::attachNode(Node &n)
     {
-        if ( &n != this && !this->m_children->contains(&n))
+        if ( &n != this && !this->m_Children->contains(&n))
         {
-            this->m_children->append(&n);
+            this->m_Children->append(&n);
         }
         return this;
     }
 
     void Node::setParent(Node &p)
     {
-        m_parent = &p;
+        m_Parent = &p;
     }
 
     bool Node::hasObject()
     {
-        return (m_object != NULL && m_object != 0);
+        return (m_Object != NULL && m_Object != 0);
     }
 
     QLinkedList<Node *> *Node::getChildren()
     {
-        return m_children;
+        return m_Children;
     }
 
     void Node::setName(char *n)
     {
-        m_name = n;
+        m_Name = n;
     }
 
     char *Node::getName()
     {
-        return m_name;
+        return m_Name;
     }
 
 }

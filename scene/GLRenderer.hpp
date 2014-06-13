@@ -44,15 +44,15 @@ namespace scene
         virtual void resizeGL(int w, int h);
         virtual void paintGL();
 
-        int Mousex = 0;
-        int Mousey = 0;
+        int m_Mousex = 0;
+        int m_Mousey = 0;
 
-        glm::mat4 m_projection;
-        glm::mat4 m_modelView;
+        glm::mat4 m_Projection;
+        glm::mat4 m_ModelView;
 
-        Node * m_rootNode;
-        Camera * cam;
-        TrackCamera * trackCam;
+        Node * m_RootNode;
+        Camera * m_Cam;
+        TrackCamera * m_TrackCam;
 
     };
 }

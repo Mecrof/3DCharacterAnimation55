@@ -4,15 +4,15 @@ namespace scene
 {
     Spatial::Spatial()
     {
-        m_position = glm::vec3(0.0f);
-        m_rotation = glm::angleAxis(0.0f, glm::vec3(0.0f));
-        m_scale = glm::vec3(1.0f);
+        m_Position = glm::vec3(0.0f);
+        m_Rotation = glm::angleAxis(0.0f, glm::vec3(0.0f));
+        m_Scale = glm::vec3(1.0f);
     }
 
     glm::vec3 *Spatial::translate(glm::vec3 vector)
     {
-        m_position += vector;
-        return &m_position;
+        m_Position += vector;
+        return &m_Position;
     }
 
     glm::vec3 *Spatial::translate(float x, float y, float z)
@@ -27,14 +27,14 @@ namespace scene
 
     glm::quat *Spatial::rotate(glm::quat rotation)
     {
-        m_rotation *= rotation;
-        return &m_rotation;
+        m_Rotation *= rotation;
+        return &m_Rotation;
     }
 
     glm::vec3 *Spatial::scale(glm::vec3 factors)
     {
-        m_scale *= factors;
-        return &m_scale;
+        m_Scale *= factors;
+        return &m_Scale;
     }
 
     glm::vec3 *Spatial::scale(float x, float y, float z)
@@ -44,47 +44,47 @@ namespace scene
 
     glm::vec3 &Spatial::getPosition()
     {
-        return m_position;
+        return m_Position;
     }
 
     void Spatial::setPosition(glm::vec3 position)
     {
-        m_position = position;
+        m_Position = position;
     }
 
     void Spatial::setPosition(float x, float y, float z)
     {
-        m_position.x = x; m_position.y = y; m_position.z = z;
+        m_Position.x = x; m_Position.y = y; m_Position.z = z;
     }
 
     glm::quat &Spatial::getRotation()
     {
-        return m_rotation;
+        return m_Rotation;
     }
 
     void Spatial::setRotation(glm::quat rotation)
     {
-        m_rotation = rotation;
+        m_Rotation = rotation;
     }
 
     void Spatial::setRotation(float angle, glm::vec3 axis)
     {
-        m_rotation = glm::angleAxis(angle, axis);
+        m_Rotation = glm::angleAxis(angle, axis);
     }
 
     glm::vec3 &Spatial::getScale()
     {
-        return m_scale;
+        return m_Scale;
     }
 
     void Spatial::setScale(glm::vec3 scale)
     {
-        m_scale = scale;
+        m_Scale = scale;
     }
 
     void Spatial::setScale(float x, float y, float z)
     {
-        m_scale.x = x; m_scale.y = y; m_scale.z = z;
+        m_Scale.x = x; m_Scale.y = y; m_Scale.z = z;
     }
 
 }

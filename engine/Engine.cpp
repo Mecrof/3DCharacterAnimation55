@@ -6,59 +6,59 @@ namespace engine
     {
         if ( fps == 0 )
         {
-            this->m_timer = NULL;
+            this->m_Timer = NULL;
         }
         else
         {
-            m_timer = new QTimer(this);
+            m_Timer = new QTimer(this);
             //connect timeout() signal to clockEvent() slot
-            connect(m_timer, SIGNAL(timeout()), this, SLOT(clockEvent()));
+            connect(m_Timer, SIGNAL(timeout()), this, SLOT(clockEvent()));
 
         }
-        m_fps = fps;
+        m_Fps = fps;
         if (renderer == 0)
         {
-            m_renderer = NULL;
+            m_Renderer = NULL;
         }
         else
         {
-            m_renderer = renderer;
-            connect(m_renderer, SIGNAL(closing()), this, SLOT(exitEvent()));
+            m_Renderer = renderer;
+            connect(m_Renderer, SIGNAL(closing()), this, SLOT(exitEvent()));
         }
-        m_time = QTime();
+        m_Time = QTime();
     }
 
     Engine::~Engine()
     {
         std::cout <<"Timer stopping" <<std::endl;
         //m_timer->stop();
-        delete m_timer;
+        delete m_Timer;
         //delete m_renderer;
         std::cout <<"Timer stopped"<<std::endl;
     }
 
     void Engine::start()
     {
-        m_timer->start(1000/m_fps);//set clock rate
-        m_time.start();
-        m_renderer->show();
+        m_Timer->start(1000/m_Fps);//set clock rate
+        m_Time.start();
+        m_Renderer->show();
     }
 
     void Engine::clockEvent()
     {
-        int tpf = m_time.elapsed();
-        m_time.restart();
+        int tpf = m_Time.elapsed();
+        m_Time.restart();
         //std::cout <<"FPS : "<<1000.0f/tpf<<std::endl;
         //std::cout <<"Time per frame : "<<tpf/1000.0f<<std::endl;
-        m_renderer->update(tpf/1000.0f);
-        m_renderer->updateGL();
+        m_Renderer->update(tpf/1000.0f);
+        m_Renderer->updateGL();
     }
 
     void Engine::exitEvent()
     {
-        this->disconnect(m_renderer, SIGNAL(closing()), this, SLOT(clockEvent()));
-        this->disconnect(m_timer, SIGNAL(timeout()), this, SLOT(clockEvent()));
-        m_timer->stop();
+        this->disconnect(m_Renderer, SIGNAL(closing()), this, SLOT(clockEvent()));
+        this->disconnect(m_Timer, SIGNAL(timeout()), this, SLOT(clockEvent()));
+        m_Timer->stop();
         std::cout << "ExitEvent" << std::endl;
     }
 }

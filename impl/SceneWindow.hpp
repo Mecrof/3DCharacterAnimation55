@@ -16,19 +16,17 @@ public:
     void initialize();
     void update(float tpf);
 
-    void keyPressEvent(QKeyEvent * e);
-
     void setModel(QString);
     void runAnimation(int i);
     void addAnimation(const std::string& file_name);
     scene::SpotLight::Light* getLight();
 
-    AnimMesh * myMesh;
-    Triangle * triangle;
-     Triangle * triangle2;
-    scene::Node * subNode;
+    AnimMesh * m_MyMesh;
+    Triangle * m_Triangle;
+     Triangle * m_Triangle2;
+    scene::Node * m_SubNode;
 
-    float factor;
+    float m_Factor;
 
 };
 

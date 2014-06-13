@@ -2,74 +2,74 @@
 
 namespace scene
 {
-    Shader::Shader() : m_vertexID(0), m_fragmentID(0), m_programID(0), m_srcVertexShader(), m_srcFragmentShader()
+    Shader::Shader() : m_VertexID(0), m_FragmentID(0), m_ProgramID(0), m_SrcVertexShader(), m_SrcFragmentShader()
     {
     }
 
     Shader::Shader(Shader const &s)
     {
-        m_srcVertexShader = s.m_srcVertexShader;
-        m_srcFragmentShader = s.m_srcFragmentShader;
+        m_SrcVertexShader = s.m_SrcVertexShader;
+        m_SrcFragmentShader = s.m_SrcFragmentShader;
 
         this->bind();
     }
 
-    Shader::Shader(std::string srcVertexShader, std::string srcFragmentShader) : m_vertexID(0), m_fragmentID(0), m_programID(0),
-                                                                           m_srcVertexShader(srcVertexShader), m_srcFragmentShader(srcFragmentShader)
+    Shader::Shader(std::string srcVertexShader, std::string srcFragmentShader) : m_VertexID(0), m_FragmentID(0), m_ProgramID(0),
+                                                                           m_SrcVertexShader(srcVertexShader), m_SrcFragmentShader(srcFragmentShader)
     {
     }
 
     Shader::~Shader()
     {
-        glDeleteShader(m_vertexID);
-        glDeleteShader(m_fragmentID);
-        glDeleteProgram(m_programID);
+        glDeleteShader(m_VertexID);
+        glDeleteShader(m_FragmentID);
+        glDeleteProgram(m_ProgramID);
     }
 
     bool Shader::bind()
     {
-        if(glIsShader(m_vertexID) == GL_TRUE)
-            glDeleteShader(m_vertexID);
-        if(glIsShader(m_fragmentID) == GL_TRUE)
-            glDeleteShader(m_fragmentID);
-        if(glIsProgram(m_programID) == GL_TRUE)
-            glDeleteProgram(m_programID);
+        if(glIsShader(m_VertexID) == GL_TRUE)
+            glDeleteShader(m_VertexID);
+        if(glIsShader(m_FragmentID) == GL_TRUE)
+            glDeleteShader(m_FragmentID);
+        if(glIsProgram(m_ProgramID) == GL_TRUE)
+            glDeleteProgram(m_ProgramID);
 
-        if(!compile(m_vertexID, GL_VERTEX_SHADER, m_srcVertexShader))
+        if(!compile(m_VertexID, GL_VERTEX_SHADER, m_SrcVertexShader))
             return false;
 
-        if(!compile(m_fragmentID, GL_FRAGMENT_SHADER, m_srcFragmentShader))
+        if(!compile(m_FragmentID, GL_FRAGMENT_SHADER, m_SrcFragmentShader))
             return false;
 
-        m_programID = glCreateProgram();
+        m_ProgramID = glCreateProgram();
 
-        glAttachShader(m_programID, m_vertexID);
-        glAttachShader(m_programID, m_fragmentID);
+        glAttachShader(m_ProgramID, m_VertexID);
+        glAttachShader(m_ProgramID, m_FragmentID);
     /*
         glBindAttribLocation(m_programID, 0, "in_Vertex");
         glBindAttribLocation(m_programID, 1, "in_Color");
         glBindAttribLocation(m_programID, 2, "in_TexCoord0");
     */
-        glLinkProgram(m_programID);
+        glLinkProgram(m_ProgramID);
 
         GLint linkError(0);
-        glGetProgramiv(m_programID, GL_LINK_STATUS, &linkError);
+        glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &linkError);
 
         //if error
         if(linkError != GL_TRUE)
         {
             GLint errorSize(0);
-            glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &errorSize);
+            glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &errorSize);
 
             char *error = new char[errorSize + 1];
 
-            glGetShaderInfoLog(m_programID, errorSize, &errorSize, error);
+            glGetShaderInfoLog(m_ProgramID, errorSize, &errorSize, error);
             error[errorSize] = '\0';
 
             std::cout << error << std::endl;
 
             delete[] error;
-            glDeleteProgram(m_programID);
+            glDeleteProgram(m_ProgramID);
 
             return false;
         }
@@ -136,7 +136,7 @@ namespace scene
 
     GLuint Shader::getProgramID() const
     {
-        return m_programID;
+        return m_ProgramID;
     }
 
 }

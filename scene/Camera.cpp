@@ -3,26 +3,26 @@ namespace scene
 {
     Camera::Camera()
     {
-        m_phi = 0.0f;
-        m_theta = 0.0f;
-        m_orientation = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Phi = 0.0f;
+        m_Theta = 0.0f;
+        m_Orientation = glm::vec3(0.0f, 0.0f, 0.0f);
         m_Verticalaxis = glm::vec3(0.0f, 0.0f, 1.0f);
-        m_sideMove = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_position = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_target = glm::vec3(0.0f, 0.0f, 0.0f);
-        sensivity = 0.5f;
+        m_SideMove = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Target = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Sensivity = 0.5f;
     }
 
     Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 verticalaxis)
     {
-        m_phi = -35.26f;
-        m_theta = -135.0f;
-        m_orientation = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Phi = -35.26f;
+        m_Theta = -135.0f;
+        m_Orientation = glm::vec3(0.0f, 0.0f, 0.0f);
         m_Verticalaxis = verticalaxis;
-        m_sideMove = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_position = position;
-        m_target = target;
-        sensivity = 0.5f;
+        m_SideMove = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_Position = position;
+        m_Target = target;
+        m_Sensivity = 0.5f;
     }
 
     Camera::~Camera()
@@ -33,16 +33,16 @@ namespace scene
     void Camera::orientation(int xRel, int yRel, float sensibility)
     {
         // "-=" for trigonometric angles
-        m_phi   -= yRel*sensibility;
-        m_theta -= xRel*sensibility;
+        m_Phi   -= yRel*sensibility;
+        m_Theta -= xRel*sensibility;
 
-        if(m_phi > 89.0f)
+        if(m_Phi > 89.0f)
         {
-            m_phi = 89.0f;
+            m_Phi = 89.0f;
         }
-        else if(m_phi < -89.0f)
+        else if(m_Phi < -89.0f)
         {
-            m_phi = -89.0f;
+            m_Phi = -89.0f;
         }
         /*
         else if(m_theta < -89.0f)
@@ -51,42 +51,42 @@ namespace scene
         }
         */
 
-        float phiRadian = m_phi * M_PI / 180;
-        float thetaRadian = m_theta * M_PI / 180;
+        float phiRadian = m_Phi * M_PI / 180;
+        float thetaRadian = m_Theta * M_PI / 180;
 
         // If vertical axis is x
         if(m_Verticalaxis.x == 1.0)
         {
-            m_orientation.x = sin(phiRadian);
-            m_orientation.y = cos(phiRadian) * cos(thetaRadian);
-            m_orientation.z = cos(phiRadian) * sin(thetaRadian);
+            m_Orientation.x = sin(phiRadian);
+            m_Orientation.y = cos(phiRadian) * cos(thetaRadian);
+            m_Orientation.z = cos(phiRadian) * sin(thetaRadian);
         }
 
 
         // If vertical axis is y
         else if(m_Verticalaxis.y == 1.0)
         {
-            m_orientation.x = cos(phiRadian) * sin(thetaRadian);
-            m_orientation.y = sin(phiRadian);
-            m_orientation.z = cos(phiRadian) * cos(thetaRadian);
+            m_Orientation.x = cos(phiRadian) * sin(thetaRadian);
+            m_Orientation.y = sin(phiRadian);
+            m_Orientation.z = cos(phiRadian) * cos(thetaRadian);
         }
 
 
         // If vertical axis is z
         else
         {
-            m_orientation.x = cos(phiRadian) * cos(thetaRadian);
-            m_orientation.y = cos(phiRadian) * sin(thetaRadian);
-            m_orientation.z = sin(phiRadian);
+            m_Orientation.x = cos(phiRadian) * cos(thetaRadian);
+            m_Orientation.y = cos(phiRadian) * sin(thetaRadian);
+            m_Orientation.z = sin(phiRadian);
         }
 
 
         // Normal calcul
-        m_sideMove = glm::cross(m_Verticalaxis, m_orientation);
-        m_sideMove = glm::normalize(m_sideMove);
+        m_SideMove = glm::cross(m_Verticalaxis, m_Orientation);
+        m_SideMove = glm::normalize(m_SideMove);
 
         // Target calcul
-        m_target = m_position + m_orientation;
+        m_Target = m_Position + m_Orientation;
     }
 
     void Camera::move(QEvent *event)
@@ -97,20 +97,20 @@ namespace scene
             switch(key->key())
             {
                 case Qt::Key_Up:
-                    m_position = m_position + m_orientation * sensivity;
-                    m_target = m_position + m_orientation;
+                    m_Position = m_Position + m_Orientation * m_Sensivity;
+                    m_Target = m_Position + m_Orientation;
                     break;
                 case Qt::Key_Down:
-                    m_position = m_position - m_orientation * sensivity;
-                    m_target = m_position + m_orientation;
+                    m_Position = m_Position - m_Orientation * m_Sensivity;
+                    m_Target = m_Position + m_Orientation;
                     break;
                 case Qt::Key_Left:
-                    m_position = m_position + m_sideMove * sensivity;
-                    m_target = m_position + m_orientation;
+                    m_Position = m_Position + m_SideMove * m_Sensivity;
+                    m_Target = m_Position + m_Orientation;
                     break;
                 case Qt::Key_Right:
-                    m_position = m_position - m_sideMove * sensivity;
-                    m_target = m_position + m_orientation;
+                    m_Position = m_Position - m_SideMove * m_Sensivity;
+                    m_Target = m_Position + m_Orientation;
                     break;
             }
        }
@@ -118,59 +118,59 @@ namespace scene
 
     void Camera::lookat(glm::mat4 &modelview)
     {
-        modelview = glm::lookAt(m_position, m_target, m_Verticalaxis);
+        modelview = glm::lookAt(m_Position, m_Target, m_Verticalaxis);
     }
 
     void Camera::setTarget(glm::vec3 target)
     {
         // Orientation vector calcul
-        m_orientation = m_target - m_position;
-        m_orientation = glm::normalize(m_orientation);
+        m_Orientation = m_Target - m_Position;
+        m_Orientation = glm::normalize(m_Orientation);
 
 
         // If vertical axis is x
         if(m_Verticalaxis.x == 1.0)
         {
-            m_phi = asin(m_orientation.x);
-            m_theta = acos(m_orientation.y / cos(m_phi));
+            m_Phi = asin(m_Orientation.x);
+            m_Theta = acos(m_Orientation.y / cos(m_Phi));
 
-            if(m_orientation.y < 0)
-                m_theta *= -1;
+            if(m_Orientation.y < 0)
+                m_Theta *= -1;
         }
 
 
         // If vertical axis is y
         else if(m_Verticalaxis.y == 1.0)
         {
-            m_phi = asin(m_orientation.y);
-            m_theta = acos(m_orientation.z / cos(m_phi));
+            m_Phi = asin(m_Orientation.y);
+            m_Theta = acos(m_Orientation.z / cos(m_Phi));
 
-            if(m_orientation.z < 0)
-                m_theta *= -1;
+            if(m_Orientation.z < 0)
+                m_Theta *= -1;
         }
 
 
         // If vertical axis is z
         else
         {
-            m_phi = asin(m_orientation.x);
-            m_theta = acos(m_orientation.z / cos(m_phi));
+            m_Phi = asin(m_Orientation.x);
+            m_Theta = acos(m_Orientation.z / cos(m_Phi));
 
-            if(m_orientation.z < 0)
-                m_theta *= -1;
+            if(m_Orientation.z < 0)
+                m_Theta *= -1;
         }
-        m_phi = m_phi * 180 / M_PI;
-        m_theta = m_theta * 180 / M_PI;
+        m_Phi = m_Phi * 180 / M_PI;
+        m_Theta = m_Theta * 180 / M_PI;
     }
 
 
     void Camera::setPosition(glm::vec3 position)
     {
         // Position update
-        m_position = position;
+        m_Position = position;
 
         // Target
-        m_target = m_position + m_orientation;
+        m_Target = m_Position + m_Orientation;
     }
 
     void Camera::setSensivity(float sensivity)

@@ -1,6 +1,6 @@
 #include "AnimMesh.h"
 
-#include <matrix4x4.h>
+#include <assimp/matrix4x4.h>
 
 /**************************************************************************
 * Name: cloneMatrix4x4ToGLM
@@ -11,7 +11,7 @@
 * Returns:
 - value: void
 **************************************************************************/
-void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
+void clone_matrix4x4_to_GLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
 {
     mat1[0][0] = mat2[0][0];
     mat1[0][1] = mat2[0][1];
@@ -43,7 +43,7 @@ void cloneMatrix4x4ToGLM(glm::mat4 & mat1, const aiMatrix4x4 & mat2)
 * Returns:
 - value: void
 **************************************************************************/
-void cloneMatrix4x4ToASSIMP(aiMatrix4x4 & mat1, glm::mat4 & mat2)
+void clone_matrix4x4_to_ASSIMP(aiMatrix4x4 & mat1, glm::mat4 & mat2)
 {
     mat1[0][0] = mat2[0][0];
     mat1[0][1] = mat2[0][1];
@@ -74,18 +74,18 @@ AnimMesh::AnimMesh()
 {
     this->m_Light = new scene::SpotLight::Light;
 
-    this->m_shader = new scene::Shader("./Shaders/light.vert", "./Shaders/light.frag");
-    this->m_shader->bind();
+    this->m_Shader = new scene::Shader("./Shaders/light.vert", "./Shaders/light.frag");
+    this->m_Shader->bind();
 
-    m_IdModelView = glGetUniformLocation(m_shader->getProgramID(), "modelview");
-    m_IdProjection = glGetUniformLocation(m_shader->getProgramID(), "projection");
+    m_IdModelView = glGetUniformLocation(m_Shader->getProgramID(), "modelview");
+    m_IdProjection = glGetUniformLocation(m_Shader->getProgramID(), "projection");
 
     for (GLuint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(this->m_BoneLocation); i++)
     {
         char name[128];
         memset(name, 0, sizeof(name));
         snprintf(name, sizeof(name), "gBones[%d]", i);
-        this->m_BoneLocation[i] = glGetUniformLocation(m_shader->getProgramID(), name);
+        this->m_BoneLocation[i] = glGetUniformLocation(m_Shader->getProgramID(), name);
     }
 
     this->m_RunningTime = 0.01f;
@@ -308,14 +308,14 @@ bool AnimMesh::initFromScene(const aiScene* scene, const std::string& file_name)
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POS_VB]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0]) * positions.size(), &positions[0], GL_STATIC_DRAW);
 
-    GLint id_vertex = glGetAttribLocation(m_shader->getProgramID(), "in_Vertex");
+    GLint id_vertex = glGetAttribLocation(m_Shader->getProgramID(), "in_Vertex");
     glEnableVertexAttribArray(id_vertex);
     glVertexAttribPointer(id_vertex, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[TEXCOORD_VB]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(textures[0]) * textures.size(), &textures[0], GL_STATIC_DRAW);
 
-    GLint id_tex_coord = glGetAttribLocation(m_shader->getProgramID(), "in_TexCoord");
+    GLint id_tex_coord = glGetAttribLocation(m_Shader->getProgramID(), "in_TexCoord");
     glEnableVertexAttribArray(id_tex_coord);
     glVertexAttribPointer(id_tex_coord, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -325,18 +325,18 @@ bool AnimMesh::initFromScene(const aiScene* scene, const std::string& file_name)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
-    GLint id_normal = glGetAttribLocation(m_shader->getProgramID(), "in_Normal");
+    GLint id_normal = glGetAttribLocation(m_Shader->getProgramID(), "in_Normal");
     glEnableVertexAttribArray(id_normal);
     glVertexAttribPointer(id_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[BONE_VB]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(bones[0]) * bones.size(), &bones[0], GL_STATIC_DRAW);
 
-    GLint id_bone = glGetAttribLocation(m_shader->getProgramID(), "in_BoneIDs");
+    GLint id_bone = glGetAttribLocation(m_Shader->getProgramID(), "in_BoneIDs");
     glEnableVertexAttribArray(id_bone);
     glVertexAttribPointer(id_bone, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
 
-    GLint id_bone_weight = glGetAttribLocation(m_shader->getProgramID(), "in_BoneWeight");
+    GLint id_bone_weight = glGetAttribLocation(m_Shader->getProgramID(), "in_BoneWeight");
     glEnableVertexAttribArray(id_bone_weight);
     glVertexAttribPointer(id_bone_weight, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
 
@@ -413,7 +413,7 @@ void AnimMesh::loadBones(GLuint mesh_index, const aiMesh *ai_mesh, std::vector<V
             this->m_NumBones++;
             BoneInfo bone_info;
             this->m_BoneInfo.push_back(bone_info);
-            cloneMatrix4x4ToGLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
+            clone_matrix4x4_to_GLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
             this->m_BoneMapping[bone_name] = bone_index;
         }
         else
@@ -422,7 +422,7 @@ void AnimMesh::loadBones(GLuint mesh_index, const aiMesh *ai_mesh, std::vector<V
         }
 
         this->m_BoneMapping[bone_name] = bone_index;
-        cloneMatrix4x4ToGLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
+        clone_matrix4x4_to_GLM(this->m_BoneInfo[bone_index].m_BoneOffset, ai_mesh->mBones[i]->mOffsetMatrix);
 
         for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++)
         {
@@ -719,7 +719,7 @@ void AnimMesh::readNodeHierarchy(float animation_time, const aiNode *node, const
    const aiAnimation* animation = this->m_Animation;
    glm::mat4 node_transformation;
 
-   cloneMatrix4x4ToGLM(node_transformation, node->mTransformation);
+   clone_matrix4x4_to_GLM(node_transformation, node->mTransformation);
 
    const aiNodeAnim* node_anim = this->findNodeAnim(animation, node_name);
 
@@ -813,14 +813,14 @@ void AnimMesh::render(const glm::mat4 &model_view, const glm::mat4 &projection)
         return;
 
     glBindVertexArray(m_VAO);
-    glUseProgram(m_shader->getProgramID());
+    glUseProgram(m_Shader->getProgramID());
 
-    this->m_Light->render(m_shader->getProgramID());
+    this->m_Light->render(m_Shader->getProgramID());
 
     glUniformMatrix4fv(this->m_IdModelView, 1, GL_FALSE, glm::value_ptr(model_view));
     glUniformMatrix4fv(this->m_IdProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint id_has_animation = glGetUniformLocation(m_shader->getProgramID(), "hasAnimation");
+    GLint id_has_animation = glGetUniformLocation(m_Shader->getProgramID(), "hasAnimation");
 
     if (this->m_AnimationSelected)
     {

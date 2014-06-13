@@ -28,14 +28,14 @@ namespace scene
 
         virtual ~TrackCamera();
     protected:
-        double motionSensivity;
-        double scrollSensivity;
-        double distance;
-        double angleY;
-        double angleZ;
-        glm::vec3 eye;
-        glm::vec3 center;
-        glm::vec3 up;
+        double m_MotionSensivity;
+        double m_ScrollSensivity;
+        double m_Distance;
+        double m_AngleY;
+        double m_AngleZ;
+        glm::vec3 m_Eye;
+        glm::vec3 m_Center;
+        glm::vec3 m_Up;
 
     };
 }

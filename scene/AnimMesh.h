@@ -6,9 +6,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <scene.h>
-#include <Importer.hpp>
-#include <postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 #include "SceneObject.hpp"
 #include "Light.hpp"
@@ -81,8 +81,8 @@ struct BoneInfo
     glm::mat4 m_FinalTransformation;
 };
 
-void cloneMatrix4x4ToGLM(glm::mat4& dest, const aiMatrix4x4& source);
-void cloneMatrix4x4ToASSIMP(aiMatrix4x4& dest, glm::mat4& source);
+void clone_matrix4x4_to_GLM(glm::mat4& dest, const aiMatrix4x4& source);
+void clone_matrix4x4_to_ASSIMP(aiMatrix4x4& dest, glm::mat4& source);
 
 class AnimMesh : public scene::SceneObject {
 
