@@ -1,6 +1,9 @@
 #include "Camera.hpp"
 namespace scene
 {
+/////////////////////////////// PUBLIC ///////////////////////////////////////
+//============================= LIFECYCLE ====================================
+
     Camera::Camera()
     {
         m_Phi = 0.0f;
@@ -29,7 +32,17 @@ namespace scene
     {
 
     }
-
+    
+//============================= OPERATIONS ===================================
+/**************************************************************************
+* Name: Orientation
+* Description: Move the camera depending of the given inputs
+* Inputs:
+- parameter1: xRel Relative mouse position on x
+- parameter2: yRel Relative mouse position on y
+- parameter3: sensibility set the camera movement speed
+* Returns: void
+**************************************************************************/
     void Camera::orientation(int xRel, int yRel, float sensibility)
     {
         // "-=" for trigonometric angles
@@ -44,12 +57,6 @@ namespace scene
         {
             m_Phi = -89.0f;
         }
-        /*
-        else if(m_theta < -89.0f)
-        {
-            m_theta = -89.0f;
-        }
-        */
 
         float phiRadian = m_Phi * M_PI / 180;
         float thetaRadian = m_Theta * M_PI / 180;
@@ -88,7 +95,14 @@ namespace scene
         // Target calcul
         m_Target = m_Position + m_Orientation;
     }
-
+    
+/**************************************************************************
+* Name: Move
+* Description: Catch a key event and move the camera
+* Inputs:
+- parameter1: QEvent key event
+* Returns: void
+**************************************************************************/
     void Camera::move(QEvent *event)
     {
         if(event->type() == QKeyEvent::KeyPress)
@@ -115,12 +129,20 @@ namespace scene
             }
        }
     }
-
+    
+/**************************************************************************
+* Name: LookAt
+* Description: Allow the camera to look at the given modelview
+* Inputs:
+- parameter1: modelview is the view of the world
+* Returns: void
+**************************************************************************/
     void Camera::lookat(glm::mat4 &modelview)
     {
         modelview = glm::lookAt(m_Position, m_Target, m_Verticalaxis);
     }
-
+    
+//============================= ATTRIBUTE ACCESSORS ==========================
     void Camera::setTarget(glm::vec3 target)
     {
         // Orientation vector calcul
@@ -166,10 +188,8 @@ namespace scene
 
     void Camera::setPosition(glm::vec3 position)
     {
-        // Position update
         m_Position = position;
 
-        // Target
         m_Target = m_Position + m_Orientation;
     }
 
